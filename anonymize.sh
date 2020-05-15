@@ -53,6 +53,14 @@ function check_i {
   fi
 }
 
+
+function substitute_docx() {
+  for f in $(find $zipdir -mindepth 2 -name '*.xml' ); do # get all xml only in subdirectory (not interested elsewhere)
+
+  sed -i -E s@"(author=\")$name_from(\")"@"\1$name_to\2"@g $f # this gets the author of the comments
+  sed -i -E s@"(By>)$name_from(<)"@"\1$name_to\2"@g $f ; done # caputure some metatags as well
+}
+
 function substitute_it {
 
   if  [[ $(file --mime-type -b "$orig_filename") =~ application/vnd.oasis.opendocument.text ]] ; then
@@ -61,12 +69,11 @@ function substitute_it {
 
 elif [[ $(file --mime-type -b "$orig_filename") =~ application/vnd.openxmlformats-officedocument.wordprocessingml.document ]]; then
 
-  for f in $(find $zipdir -mindepth 2 -name '*.xml' ); do # get all xml only in subdirectory (not interested elsewhere)
+  substitute_docx
 
-  echo "this is $f"
+elif [[ $(file --mime-type -b "$orig_filename") =~ application/octet-stream ]] && [[ $orig_filename == *.docx ]]; then #sometimes mimetype is broken, use extension
 
-  sed -i -E s@"(author=\")$name_from(\")"@"\1$name_to\2"@g $f # this gets the author of the comments
-  sed -i -E s@"(By>)$name_from(<)"@"\1$name_to\2"@g $f ; done # caputure some metatags as well
+  substitute_docx
 
 else
   echo "WTF"
@@ -75,18 +82,18 @@ fi
 
 function list_authors {
 
-mapfile -t authors_array < <(grep -hoP "$author_string" $zipdir -R | sort | uniq | sed -E "s@$author_string@\1@g")
+  mapfile -t authors_array < <(grep -hoP "$author_string" $zipdir -R | sort | uniq | sed -E "s@$author_string@\1@g")
 
-			echo "+----------------------------------------------------------------"
-if [[ ${#authors_array[*]} == 1 ]] ; then
-  printf "The author is: "
-  printf "%s " "${authors_array[@]}."
-else
-  printf "Authors are: "
-  printf "\"%s\" " "${authors_array[@]}"
-fi
-      printf "\n"
-			echo "+----------------------------------------------------------------"
+  echo "+----------------------------------------------------------------"
+  if [[ ${#authors_array[*]} == 1 ]] ; then
+    printf "The author is: "
+    printf "%s " "${authors_array[@]}."
+  else
+    printf "Authors are: "
+    printf "\"%s\" " "${authors_array[@]}"
+  fi
+  printf "\n"
+  echo "+----------------------------------------------------------------"
 }
 
 function change_all {
@@ -161,6 +168,14 @@ author_string="<dc:creator>(.*?)</dc:creator>"
 elif
 
 [[ $(file --mime-type -b "$orig_filename") =~ application/vnd.openxmlformats-officedocument.wordprocessingml.document ]]; then
+
+printf "\\nGood filetype OOXML "
+
+author_string="w:author=\"(.*?)\""
+
+elif
+
+[[ $(file --mime-type -b "$orig_filename") =~ application/octet-stream ]] && [[ $orig_filename == *.docx ]]; then #sometimes mimetype is broken, use extension
 
 printf "\\nGood filetype OOXML "
 
