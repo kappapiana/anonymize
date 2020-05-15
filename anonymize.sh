@@ -61,12 +61,12 @@ function substitute_it {
 
 elif [[ $(file --mime-type -b "$orig_filename") =~ application/vnd.openxmlformats-officedocument.wordprocessingml.document ]]; then
 
-  content_dir=`find $zipdir -mindepth 2 -name '*.xml' | cut -f 1,2,3,4 -d /`
+  for f in $(find $zipdir -mindepth 2 -name '*.xml' ); do # get all xml only in subdirectory (not interested elsewhere)
 
-  for d in $content_dir ; do
+  echo "this is $f"
 
-  sed -i -E s@"(author=\")$name_from(\")"@"\1$name_to\2"@g $d/*.xml
-  sed -i -E s@"(By>)$name_from(<)"@"\1$name_to\2"@g $d/*.xml ; done # caputure some metatags as well
+  sed -i -E s@"(author=\")$name_from(\")"@"\1$name_to\2"@g $f # this gets the author of the comments
+  sed -i -E s@"(By>)$name_from(<)"@"\1$name_to\2"@g $f ; done # caputure some metatags as well
 
 else
   echo "WTF"
