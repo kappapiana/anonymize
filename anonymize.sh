@@ -63,15 +63,11 @@ function substitute_docx() {
 
 function substitute_it {
 
-  if  [[ $(file --mime-type -b "$orig_filename") =~ application/vnd.oasis.opendocument.text ]] ; then
+  if  [[ $filetype == ODT ]] ; then
 
   sed -i -E s@"(or>)$name_from(<)"@"\1$name_to\2"@g $zipdir/*.xml
 
-elif [[ $(file --mime-type -b "$orig_filename") =~ application/vnd.openxmlformats-officedocument.wordprocessingml.document ]]; then
-
-  substitute_docx
-
-elif [[ $(file --mime-type -b "$orig_filename") =~ application/octet-stream ]] && [[ $orig_filename == *.docx ]]; then #sometimes mimetype is broken, use extension
+elif [[ $filetype == DOCX ]]; then
 
   substitute_docx
 
@@ -165,6 +161,8 @@ printf "\\nGood file type ODT"
 
 author_string="<dc:creator>(.*?)</dc:creator>"
 
+filetype=ODT
+
 elif
 
 [[ $(file --mime-type -b "$orig_filename") =~ application/vnd.openxmlformats-officedocument.wordprocessingml.document ]]; then
@@ -173,6 +171,8 @@ printf "\\nGood filetype OOXML "
 
 author_string="w:author=\"(.*?)\""
 
+filetype=DOCX
+
 elif
 
 [[ $(file --mime-type -b "$orig_filename") =~ application/octet-stream ]] && [[ $orig_filename == *.docx ]]; then #sometimes mimetype is broken, use extension
@@ -180,6 +180,8 @@ elif
 printf "\\nGood filetype OOXML "
 
 author_string="w:author=\"(.*?)\""
+
+filetype=DOCX
 
 else
 	 (printf "\\nNot an ODT nor an OOXML document, can't do " && exit 1)
