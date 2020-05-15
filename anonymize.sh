@@ -126,7 +126,7 @@ if [[  ${value} == "quit" ]] ; then
 elif [[ ${value} == "list" ]] ; then
   list_authors
   choose_subs # restart from beginning to recreate menu. Cases change.
-  exit 0 # otherwise it returns to the function
+  break  # otherwise it returns to the function
 else
 
     name_from="${value}"
@@ -146,13 +146,13 @@ clear
 
 # Checking the required number of variables
 
-[ ! -z $1 ] && printf "\nFilename is present "|| (printf "missing variable, sucker, a namefile is expected " && exit 1)
+[ ! -z "$orig_filename" ] && printf "\nFilename is present "|| (printf "missing variable, sucker, a namefile is expected " && exit 1)
 check_i
 
 #checking if correct filetype
 
 if
-[[ $(file --mime-type -b "$1") =~ application/vnd.oasis.opendocument.text ]] ; then
+[[ $(file --mime-type -b "$orig_filename") =~ application/vnd.oasis.opendocument.text ]] ; then
 
 printf "\\nGood file type ODT"
 
@@ -160,7 +160,7 @@ author_string="<dc:creator>(.*?)</dc:creator>"
 
 elif
 
-[[ $(file --mime-type -b "$1") =~ application/vnd.openxmlformats-officedocument.wordprocessingml.document ]]; then
+[[ $(file --mime-type -b "$orig_filename") =~ application/vnd.openxmlformats-officedocument.wordprocessingml.document ]]; then
 
 printf "\\nGood filetype OOXML "
 
