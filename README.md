@@ -1,6 +1,6 @@
 # ODF and DOCX anonymizer
 
-This script `anonymize.sh` does one thing and hopefully it does it well. It allows changing the metadata to comment and track changes and hopefully also other metadata to a document. **Note**, the other scripts are mostly rubbish or half-baked. Don't bother, I know.
+This script `anonymize.sh` does one thing and hopefully it does it well. It allows changing the metadata to comment and track changes and hopefully also other metadata to a document.
 
 ## Rationale
 
@@ -25,7 +25,7 @@ But I also needed that the many time (most of the time) when I have to clean up 
 
 So it will also work with docx (OOXML text document), although MS Word® has a feature to change data as an afterthought (but all or none, AFAICR).
 
-**Note**: the script will eventually go to its own repo 
+**Note**: the script will eventually go to its own repo
 
 # HOWTO
 
@@ -55,3 +55,8 @@ cd ~/documents/
 ```
 
 It will interact with you asking if you want to change everything in one go or one author by one. Eventually you will (hopefully) have a file named `_anonymized_doc.odt`. I'm not copying it over so that you can review the result without risking to destroy everything...
+
+
+## TODO
+
+- [ ] make it work from other directories 
