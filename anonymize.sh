@@ -38,7 +38,7 @@ i_ko() { printf "${red}✖${normal}\n...exiting, check logs"; }
 # some variables that will be used and make sure the zip dir exists
 
 curdir=`pwd`
-filename="_anonymized_$1"
+an_filename="_anonymized_$1"
 zipdir="/tmp/libreoffice"
 
 mkdir $zipdir 2&> /dev/null
@@ -249,11 +249,12 @@ printf "\\n"
     check_i
     printf " move to zip directory; \\n\\n"
 
-		# touch "$curdir/$filename"
-    rm "$curdir/$filename"
 
+  if [ -f "$curdir/$an_filename" ] ; then #remove anonymized if previously created, to make room for clean zipfile
+    rm "$curdir/$an_filename"
+  fi
 
-    find -print | zip "$curdir/$filename" -@ 1>/dev/null
+    find -print | zip "$curdir/$an_filename" -@ 1>/dev/null 
 
 		cd "$curdir" || exit 1 # in case it fails
     check_i
@@ -263,7 +264,7 @@ echo "
 
 ${green}Script complete${normal}
 
-***${bold}WARNING${normal}***  Newfile is in $curdir/${bold}$filename${normal}
+***${bold}WARNING${normal}***  Newfile is in $curdir/${bold}$an_filename${normal}
 
 We are not going to replace the original file, we play it safe.
 
