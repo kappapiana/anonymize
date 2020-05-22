@@ -38,7 +38,7 @@ i_ko() { printf "${red}✖${normal}\n...exiting, check logs"; }
 # some variables that will be used and make sure the zip dir exists
 
 curdir=`pwd`
-filename="_anonymized_$1"
+an_filename="_anonymized_$1"
 zipdir="/tmp/libreoffice"
 
 mkdir $zipdir 2&> /dev/null
@@ -53,20 +53,23 @@ function check_i {
   fi
 }
 
+
+function substitute_docx() {
+  for f in $(find $zipdir -mindepth 2 -name '*.xml' ); do # get all xml only in subdirectory (not interested elsewhere)
+
+  sed -i -E s@"(author=\")$name_from(\")"@"\1$name_to\2"@g $f # this gets the author of the comments
+  sed -i -E s@"(By>)$name_from(<)"@"\1$name_to\2"@g $f ; done # caputure some metatags as well
+}
+
 function substitute_it {
 
-  if  [[ $(file --mime-type -b "$orig_filename") =~ application/vnd.oasis.opendocument.text ]] ; then
+  if  [[ $filetype == ODT ]] ; then
 
   sed -i -E s@"(or>)$name_from(<)"@"\1$name_to\2"@g $zipdir/*.xml
 
-elif [[ $(file --mime-type -b "$orig_filename") =~ application/vnd.openxmlformats-officedocument.wordprocessingml.document ]]; then
+elif [[ $filetype == DOCX ]]; then
 
-  content_dir=`find $zipdir -mindepth 2 -name '*.xml' | cut -f 1,2,3,4 -d /`
-
-  for d in $content_dir ; do
-
-  sed -i -E s@"(author=\")$name_from(\")"@"\1$name_to\2"@g $d/*.xml
-  sed -i -E s@"(By>)$name_from(<)"@"\1$name_to\2"@g $d/*.xml ; done # caputure some metatags as well
+  substitute_docx
 
 else
   echo "WTF"
@@ -75,18 +78,18 @@ fi
 
 function list_authors {
 
-mapfile -t authors_array < <(grep -hoP "$author_string" $zipdir -R | sort | uniq | sed -E "s@$author_string@\1@g")
+  mapfile -t authors_array < <(grep -hoP "$author_string" $zipdir -R | sort | uniq | sed -E "s@$author_string@\1@g")
 
-			echo "+----------------------------------------------------------------"
-if [[ ${#authors_array[*]} == 1 ]] ; then
-  printf "The author is: "
-  printf "%s " "${authors_array[@]}."
-else
-  printf "Authors are: "
-  printf "\"%s\" " "${authors_array[@]}"
-fi
-      printf "\n"
-			echo "+----------------------------------------------------------------"
+  echo "+----------------------------------------------------------------"
+  if [[ ${#authors_array[*]} == 1 ]] ; then
+    printf "The author is: "
+    printf "%s " "${authors_array[@]}."
+  else
+    printf "Authors are: "
+    printf "\"%s\" " "${authors_array[@]}"
+  fi
+  printf "\n"
+  echo "+----------------------------------------------------------------"
 }
 
 function change_all {
@@ -158,6 +161,8 @@ printf "\\nGood file type ODT"
 
 author_string="<dc:creator>(.*?)</dc:creator>"
 
+filetype=ODT
+
 elif
 
 [[ $(file --mime-type -b "$orig_filename") =~ application/vnd.openxmlformats-officedocument.wordprocessingml.document ]]; then
@@ -165,6 +170,18 @@ elif
 printf "\\nGood filetype OOXML "
 
 author_string="w:author=\"(.*?)\""
+
+filetype=DOCX
+
+elif
+
+[[ $(file --mime-type -b "$orig_filename") =~ application/octet-stream ]] && [[ $orig_filename == *.docx ]]; then #sometimes mimetype is broken, use extension
+
+printf "\\nGood filetype OOXML "
+
+author_string="w:author=\"(.*?)\""
+
+filetype=DOCX
 
 else
 	 (printf "\\nNot an ODT nor an OOXML document, can't do " && exit 1)
@@ -232,11 +249,12 @@ printf "\\n"
     check_i
     printf " move to zip directory; \\n\\n"
 
-		# touch "$curdir/$filename"
-    rm "$curdir/$filename"
 
+  if [ -f "$curdir/$an_filename" ] ; then #remove anonymized if previously created, to make room for clean zipfile
+    rm "$curdir/$an_filename"
+  fi
 
-    find -print | zip "$curdir/$filename" -@ 1>/dev/null
+    find -print | zip "$curdir/$an_filename" -@ 1>/dev/null 
 
 		cd "$curdir" || exit 1 # in case it fails
     check_i
@@ -246,7 +264,7 @@ echo "
 
 ${green}Script complete${normal}
 
-***${bold}WARNING${normal}***  Newfile is in $curdir/${bold}$filename${normal}
+***${bold}WARNING${normal}***  Newfile is in $curdir/${bold}$an_filename${normal}
 
 We are not going to replace the original file, we play it safe.
 
