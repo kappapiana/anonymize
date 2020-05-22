@@ -23,9 +23,7 @@ This is the second option.
 
 But I also needed that the many time (most of the time) when I have to clean up the mess of multiple internal edits with clients working in docx. Therefore I have added the same structure (also OOXML is an XML bunch of files zipped together) for that file, without the need to convert them in ODT as I used to do before.
 
-So it will also work with docx (OOXML text document), although MS Word® has a feature to change data as an afterthought (but all or none, AFAICR).
-
-**Note**: the script will eventually go to its own repo
+So it will also work with docx (OOXML text document), although MS Word® has a feature to change data as an afterthought (but all or none, AFAICR) and this script might not be strictly necessary.
 
 # HOWTO
 
@@ -54,9 +52,9 @@ cd ~/documents/
 ~/scripts/anonymize.sh doc.odt
 ```
 
-It will interact with you asking if you want to change everything in one go or one author by one. Eventually you will (hopefully) have a file named `_anonymized_doc.odt`. I'm not copying it over so that you can review the result without risking to destroy everything...
+It will interact with you asking if you want to change everything in one go or one author by one. Eventually you will (hopefully) have a file named like `_anonymized_doc.odt`. I'm not copying it over so that you can review the result without risking to destroy everything...
 
 
 ## TODO
 
-- [ ] make it work from other directories 
+- [ ] make it work from other directories
