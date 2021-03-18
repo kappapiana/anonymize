@@ -1,8 +1,12 @@
 #!/usr/bin/env bash
 
 # *---------------------------------------------------------------------------
+#    SPDX-FileCopyrightText: Carlo Piana <kappa@piana.eu>
+#
+#    SPDX-License-Identifier: AGPL-3.0-or-later
+# *---------------------------------------------------------------------------
+#  
 #    ODT and DOCX anonymizer v.0.99
-#    Copyright (C) 2020 Carlo Piana
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
