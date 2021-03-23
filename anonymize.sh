@@ -5,7 +5,7 @@
 #
 #    SPDX-License-Identifier: AGPL-3.0-or-later
 # *---------------------------------------------------------------------------
-#  
+#
 #    ODT and DOCX anonymizer v.0.99
 #
 #    This program is free software: you can redistribute it and/or modify
@@ -35,13 +35,13 @@ declare -a authors_array_plus=()
 author_string=""
 orig_filename="$1"
 
-i_ok() { printf "${green}✔${normal}\n"; }
-i_ko() { printf "${red}✖${normal}\n...exiting, check logs"; }
+i_ok() { printf "%s✔\n%s" "${green}" "${normal}"; }
+i_ko() { printf "%s✖%s\n...exiting, check logs" "${red}" "${normal}"; }
 
 
 # some variables that will be used and make sure the zip dir exists
 
-curdir=`pwd`
+curdir=$(pwd)
 an_filename="_anonymized_$1"
 zipdir="/tmp/libreoffice"
 
@@ -62,7 +62,7 @@ function substitute_docx() {
   for f in $(find $zipdir -mindepth 2 -name '*.xml' ); do # get all xml only in subdirectory (not interested elsewhere)
 
   sed -i -E s@"(author=\")$name_from(\")"@"\1$name_to\2"@g $f # this gets the author of the comments
-  sed -i -E s@"(By>)$name_from(<)"@"\1$name_to\2"@g $f ; done # caputure some metatags as well
+  sed -i -E s@"(By>)$name_from(<)"@"\1$name_to\2"@g "$f" ; done # caputure some metatags as well
 }
 
 function substitute_it {
@@ -90,7 +90,7 @@ function list_authors {
     printf "%s " "${authors_array[@]}."
   else
     printf "Authors are: "
-    printf "\"%s\" " "${authors_array[@]}"
+    printf "\"%s\"" "${authors_array[@]}"
   fi
   printf "\n"
   echo "+----------------------------------------------------------------"
@@ -98,13 +98,13 @@ function list_authors {
 
 function change_all {
 
-	printf "Please insert the name you want to be ${red}the only one${normal} displayed in revisions \n"
+	printf "Please insert the name you want to be %sthe only one%s displayed in revisions \n" "${red}" "${normal}"
 
-	printf "instead of all the above\\n\\n${green}: > ${normal}"
+	printf "instead of all the above\\n\\n%s: > %s" "${green}" "${normal}"
 
 	read -r name_to
 
-	printf "\\nThanks, we are going to replace everything with ${green}$name_to${normal} \\n"
+	printf "\\nThanks, we are going to replace everything with %s$name_to%s \\n" "${green}" "${normal}"
 
 	for i in "${authors_array[@]}" ; do
 
@@ -122,7 +122,7 @@ authors_array_plus=("${authors_array[@]}" "list" "quit")
 quit_no=("${#authors_array_plus[*]}")
 list_no=$(( quit_no - 1 ))
 
-printf "${underline}You have the following choices:${normal}\\n"
+printf "%sYou have the following choices:%s\\n" "${underline}" "${normal}"
 PS3=""$'\n'"Choose 1 to ${#authors_array[*]} to modify actual values;"$'\n'"${list_no} to list, ${quit_no} to exit;"$'\n'"Make your choice: ${green}:>${normal} "
 
 select value in "${authors_array_plus[@]}"
@@ -139,7 +139,7 @@ else
     name_from="${value}"
 
 
-printf "insert the name you want to ${bold}change ${value} into${normal}\\n:> "
+printf "insert the name you want to change %s into%s \n:> %s" "${bold}" "${value}" "${normal}"
     read -r name_to
 
 substitute_it
@@ -153,7 +153,7 @@ clear
 
 # Checking the required number of variables
 
-[ ! -z "$orig_filename" ] && printf "\nFilename is present "|| (printf "missing variable, sucker, a namefile is expected " && exit 1)
+[ -n "$orig_filename" ] && printf "\nFilename is present" || (printf "missing variable, sucker, a namefile is expected " && exit 1)
 check_i
 
 #checking if correct filetype
@@ -249,7 +249,7 @@ printf "\\n"
 
 		# cp $1 $filename # needed to have correct structure FIXME
 
-		cd "$zipdir" || exit 1# in case cd fails
+		cd "$zipdir" || exit 1  # in case cd fails
     check_i
     printf " move to zip directory; \\n\\n"
 
@@ -258,7 +258,7 @@ printf "\\n"
     rm "$curdir/$an_filename"
   fi
 
-    find -print | zip "$curdir/$an_filename" -@ 1>/dev/null 
+    find . -print | zip "$curdir/$an_filename" -@ 1>/dev/null
 
 		cd "$curdir" || exit 1 # in case it fails
     check_i
