@@ -4,11 +4,13 @@ filename=$1
 
 searchstring=$"(\<text:changed-region xml:id=\")(.*?)(\".*?<dc:creator>)(.*?)(\<\/dc:creator\>.*?author=\")(.*?)(\".*?\</text:changed-region\>)"
 
-sed -E -i s@"(/text:changed-region>)"@"\1\\n"@g $filename
+sed -E -i s@"(<text:changed-region )"@"\\n\1"@g $filename
 #
 # # echo "|$searchstring|"
 #
 # string_match=$(grep -P -m1 -o "${searchstring}" ${1})
+
+function consolidate() {
 
 two_auths=$(grep -P -m1 -o "${searchstring}" ${1}  | perl -p -e s@"${searchstring}"@"\4+\6+\2"@)
 
@@ -38,3 +40,6 @@ if [[ $auth1 == $auth2 ]]; then
 else
   echo "no figata"
 fi
+}
+
+consolidate(filename)

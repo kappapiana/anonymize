@@ -66,6 +66,7 @@ function substitute_it {
   if  [[ $filetype == ODT ]] ; then
 
   sed -i -E s@"(or>)$name_from(<)"@"\1$name_to\2"@g $zipdir/*.xml
+  sed -i -E s@"(author=\")$name_from(\")"@"\1$name_to\2"@g $zipdir/*.xml
 
 elif [[ $filetype == DOCX ]]; then
 
@@ -254,7 +255,7 @@ printf "\\n"
     rm "$curdir/$an_filename"
   fi
 
-    find -print | zip "$curdir/$an_filename" -@ 1>/dev/null 
+    find -print | zip "$curdir/$an_filename" -@ 1>/dev/null
 
 		cd "$curdir" || exit 1 # in case it fails
     check_i
