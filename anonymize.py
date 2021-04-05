@@ -27,19 +27,18 @@ def replace_text(filename) :
 
   from_string = ""
   f.close()
-  f = open(filename, 'w')
 
   while from_string != "ciao" :
 
       from_string = input("\nPlease enter the string you want to change **from**\nIf you want to end, leave empty \n :> ")
 
       if from_string != "ciao" :
+          f = open(filename, 'w')
           for_string = input("\nPlease enter the string you want to change **to** \n\n :> ")
 
-      search_replace = re.sub(from_string, for_string, readfile)
+          search_replace = re.sub(from_string, for_string, readfile)
 
-      f.write(search_replace)
-
+          f.write(search_replace)
 
   f.close()
 
@@ -74,7 +73,7 @@ def find_authors(filename) :
 
     f.close()
 
-# find_authors(textfile)
+find_authors(textfile)
 
 replace_text(textfile)
 
