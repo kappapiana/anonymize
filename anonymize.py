@@ -11,7 +11,7 @@ def unzip_file(orig_file) :
   shutil.unpack_archive(zipped_file_name, export_dir, 'zip')
 
 
-def replace_text(filename, regexp, replace) :
+def replace_text(filename) :
   ''' opens the file ad substitutes
   the corresponding string'''
 
@@ -19,26 +19,29 @@ def replace_text(filename, regexp, replace) :
 
   # regexp = "r" + "\"" + regexp + "\""
 
-  print("replace " + regexp)
-  print(f"with: {replace}")
-
-
   # setting flag and index to 0
   flag = 0
   index = 0
 
   readfile = f.read()
-  search_replace = re.sub(regexp, replace, readfile)
 
+  from_string = ""
   f.close()
-
   f = open(filename, 'w')
 
-  f.write(search_replace)
+  while from_string != "ciao" :
+
+      from_string = input("\nPlease enter the string you want to change **from**\nIf you want to end, leave empty \n :> ")
+
+      if from_string != "ciao" :
+          for_string = input("\nPlease enter the string you want to change **to** \n\n :> ")
+
+      search_replace = re.sub(from_string, for_string, readfile)
+
+      f.write(search_replace)
+
 
   f.close()
-
-  print(f"I have changed \"{regexp}\" with \"{replace}\" in \"{filename}\"")
 
 def rezip() :
 
@@ -59,14 +62,12 @@ def rezip() :
 
 unzip_file(zipped_file_name)
 
-from_string = input("\nPlease enter the string you want to change **from** \n\n :> ")
-for_string = input("\nPlease enter the string you want to change **to** \n\n :> ")
 
-replace_text(textfile, from_string, for_string)
-
-anonymized = rezip()
-
-print(f"file is now in {anonymized}")
+replace_text(textfile)
+#
+# anonymized = rezip()
+#
+# print(f"file is now in {anonymized}")
 
 
 # TODO:
