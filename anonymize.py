@@ -1,4 +1,4 @@
-import zipfile, os, sys, re, shutil
+import os, sys, re, shutil
 
 
 zipped_file_name = sys.argv[1]
@@ -10,8 +10,7 @@ textfile = export_dir + "/content.xml"
 
 def unzip_file(orig_file) :
   print(orig_file)
-  with zipfile.ZipFile(orig_file, 'r') as zip_ref:
-    zip_ref.extractall(export_dir)
+  shutil.unpack_archive(zipped_file_name, export_dir, 'zip')
 
   print(export_dir)
 
@@ -53,9 +52,9 @@ def rezip() :
 
 
 unzip_file(zipped_file_name)
-#
-# replace_text(textfile, "Avv. Carlo Piana", "fuffa")
-#
-# rezip()
-#
-# print("Bye")
+
+replace_text(textfile, "Carlo Piana", "fuffa")
+
+rezip()
+
+print("Bye")
