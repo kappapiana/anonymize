@@ -3,7 +3,7 @@ import os, sys, re, shutil
 zipped_file_name = sys.argv[1]
 
 cwd = os.getcwd()
-export_dir = "/tmp/test/"
+export_dir = "/tmp/test"
 textfile = export_dir + "/content.xml"
 
 def unzip_file(orig_file) :
@@ -38,7 +38,7 @@ def replace_text(filename, regexp, replace) :
 
   f.close()
 
-  print(f"I have changed {regexp} with {replace} in {filename}")
+  print(f"I have changed \"{regexp}\" with \"{replace}\" in \"{filename}\"")
 
 def rezip() :
 
@@ -59,7 +59,10 @@ def rezip() :
 
 unzip_file(zipped_file_name)
 
-replace_text(textfile, "Carlo Piana", "fuffa")
+from_string = input("\nPlease enter the string you want to change **from** \n\n :> ")
+for_string = input("\nPlease enter the string you want to change **to** \n\n :> ")
+
+replace_text(textfile, from_string, for_string)
 
 anonymized = rezip()
 
@@ -67,7 +70,6 @@ print(f"file is now in {anonymized}")
 
 
 # TODO:
-# - get input for from_string and for_string
 # - make target file and regexp for docx
 # - automagically recognize fileformat and decide which function
 # - make function class and subclasses for odt and docx
