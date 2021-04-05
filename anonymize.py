@@ -48,13 +48,26 @@ def rezip() :
 
   anon_textfile = cwd + "/_anon_" + zipped_file_name
 
+  # Recreate a version of the file with the new content in it
   shutil.make_archive(anon_textfile, "zip", export_dir)
 
+  anon_textfile_zip = anon_textfile + ".zip"
+
+
+  # Rename it to the original extension FIXME: this is a hack
+
+  os.rename(anon_textfile_zip, anon_textfile)
+
+  # function returns the name of the changed file
+  return anon_textfile
 
 unzip_file(zipped_file_name)
 
 replace_text(textfile, "Carlo Piana", "fuffa")
 
-rezip()
+anonymized = rezip()
+
+print(f"file is now in {anonymized}")
+
 
 print("Bye")
