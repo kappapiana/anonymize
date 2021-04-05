@@ -1,16 +1,19 @@
-import zipfile, os, sys, re
+import zipfile, os, sys, re, shutil
 
 
 zipped_file_name = sys.argv[1]
 
+
 cwd = os.getcwd()
-export_dir = "/tmp/test"
+export_dir = "/tmp/test/"
 textfile = export_dir + "/content.xml"
 
 def unzip_file(orig_file) :
-  with zipfile.ZipFile(orig_file, 'w') as zip_ref:
+  print(orig_file)
+  with zipfile.ZipFile(orig_file, 'r') as zip_ref:
     zip_ref.extractall(export_dir)
 
+  print(export_dir)
 
 
 def replace_text(filename, regexp, replace) :
@@ -42,9 +45,17 @@ def replace_text(filename, regexp, replace) :
 
   print(f"I have changed {regexp} with {replace} in {filename}")
 
+def rezip() :
+
+  anon_textfile = cwd + "/_anon_" + zipped_file_name
+
+  shutil.make_archive(anon_textfile, "zip", export_dir)
+
+
 unzip_file(zipped_file_name)
-
-replace_text(textfile, "Avv. Carlo Piana", "fuffa")
-
-
-print("Bye")
+#
+# replace_text(textfile, "Avv. Carlo Piana", "fuffa")
+#
+# rezip()
+#
+# print("Bye")
