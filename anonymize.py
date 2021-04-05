@@ -70,4 +70,8 @@ anonymized = rezip()
 print(f"file is now in {anonymized}")
 
 
-print("Bye")
+# TODO: 
+# - get input for from_string and for_string
+# - make target file and regexp for docx
+# - automagically recognize fileformat and decide which function
+# - make function class and subclasses for odt and docx
