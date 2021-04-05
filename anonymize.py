@@ -62,12 +62,25 @@ def rezip() :
 
 unzip_file(zipped_file_name)
 
+def find_authors(filename) :
+    f = open(filename, 'r')
+    readfile = f.read()
+    authors = set(re.findall("<dc:creator>(.*?)</dc:creator>", readfile))
+
+    counter = 1
+    for i in authors :
+        print(f"author {counter} + {i}")
+        counter += 1
+
+    f.close()
+
+# find_authors(textfile)
 
 replace_text(textfile)
-#
-# anonymized = rezip()
-#
-# print(f"file is now in {anonymized}")
+
+anonymized = rezip()
+
+print(f"file is now in {anonymized}")
 
 
 # TODO:
