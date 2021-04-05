@@ -1,8 +1,6 @@
 import os, sys, re, shutil
 
-
 zipped_file_name = sys.argv[1]
-
 
 cwd = os.getcwd()
 export_dir = "/tmp/test/"
@@ -11,8 +9,6 @@ textfile = export_dir + "/content.xml"
 def unzip_file(orig_file) :
   print(orig_file)
   shutil.unpack_archive(zipped_file_name, export_dir, 'zip')
-
-  print(export_dir)
 
 
 def replace_text(filename, regexp, replace) :
@@ -53,13 +49,13 @@ def rezip() :
 
   anon_textfile_zip = anon_textfile + ".zip"
 
-
   # Rename it to the original extension FIXME: this is a hack
-
   os.rename(anon_textfile_zip, anon_textfile)
 
   # function returns the name of the changed file
   return anon_textfile
+
+# Let's run it
 
 unzip_file(zipped_file_name)
 
@@ -70,7 +66,7 @@ anonymized = rezip()
 print(f"file is now in {anonymized}")
 
 
-# TODO: 
+# TODO:
 # - get input for from_string and for_string
 # - make target file and regexp for docx
 # - automagically recognize fileformat and decide which function
