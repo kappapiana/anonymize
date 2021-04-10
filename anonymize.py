@@ -28,11 +28,11 @@ def replace_text(filename) :
   from_string = ""
   f.close()
 
-  while from_string != "ciao" :
+  while from_string != "quit" :
 
-      from_string = input("\nPlease enter the string you want to change **from**\nIf you want to end, leave empty \n :> ")
+      from_string = input("\nPlease enter the string you want to change **from**\nIf you want to end, enter \"quit\" \n :> ")
 
-      if from_string != "ciao" :
+      if from_string != "quit" :
           f = open(filename, 'w')
           for_string = input("\nPlease enter the string you want to change **to** \n\n :> ")
 
@@ -57,23 +57,29 @@ def rezip() :
   # function returns the name of the changed file
   return anon_textfile
 
-# Let's run it
-
-unzip_file(zipped_file_name)
-
 def find_authors(filename) :
     f = open(filename, 'r')
     readfile = f.read()
     authors = set(re.findall("<dc:creator>(.*?)</dc:creator>", readfile))
-
+    authors_dict = {}
     counter = 1
     for i in authors :
-        print(f"author {counter} + {i}")
+        index = f"author {counter}"
+        authors_dict[index] =  i
         counter += 1
 
     f.close()
 
-find_authors(textfile)
+    return authors_dict
+
+
+# Let's run it
+
+unzip_file(zipped_file_name)
+
+authors_list = find_authors(textfile)
+
+print(f"authors are {authors_list}")
 
 replace_text(textfile)
 
