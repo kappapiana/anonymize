@@ -1,4 +1,4 @@
-import os, sys, re, shutil
+import os, sys, re, shutil, mimetypes
 
 zipped_file_name = sys.argv[1]
 
@@ -8,41 +8,52 @@ textfile = export_dir + "/content.xml"
 
 def unzip_file(orig_file) :
   print(orig_file)
+  mimetype = mimetypes.guess_type(orig_file)
   shutil.unpack_archive(zipped_file_name, export_dir, 'zip')
 
-def replace_text(readfile, from_string, to_string) :
-  ''' gets input string to replace ad substitutes it with the corresponding string'''
+  return mimetype
 
-  print(f"now I open {readfile}")
+def replace_text(target_string, from_string, to_string) :
+  ''' gets input string to replace ad substitutes it with the corresponding string in target file'''
 
-  f = open(readfile, 'r')
+  search_replace = re.sub(from_string, to_string, target_string)
 
-  search_replace = re.sub(from_string, to_string, f)
-
-  print(f" is: {search_replace}")
-
-  f.write(search_replace)
-
-  f.close()
-
+  return search_replace
 
 
 def cycle_ask(cur_filename) :
+    '''opens and reads file to be changed, asks for input until user is fine
+    then writes the changed string.'''
+
+    f = open(cur_filename, 'r')
+    target_string = f.read()
+
+    print(find_authors(target_string))
 
     while  True :
 
-        from_string = input("\nPlease enter the string you want to change **from**\nIf you want to end, enter \"quit\" \n :> ")
+        from_string = input("\nPlease enter the string you want to change **from**\n\n :> ")
 
         for_string = input("\nPlease enter the string you want to change **to** \n\n :> ")
 
-        replace_text(cur_filename, from_string, for_string)
+        changed_text = replace_text(target_string, from_string, for_string)
 
         if input('Do You Want To Continue? [enter "stop" to stop | leave empty to continue]') == 'stop' :
+        # We have finished changing the target string, write it into the file.
           print("ok, we stop here")
+          f.close()
+          f = open(cur_filename, 'w')
+          f.write(changed_text)
+          f.close()
           break
 
         else :
-          print("another time")
+
+        # the target string must be the modified string this time:
+          print("another time -- authors are: \n")
+          print(find_authors(changed_text))
+          target_string = changed_text
+
 
 def rezip() :
 
@@ -59,10 +70,11 @@ def rezip() :
   # function returns the name of the changed file
   return anon_textfile
 
-def find_authors(filename) :
-    f = open(filename, 'r')
-    readfile = f.read()
-    authors = set(re.findall("<dc:creator>(.*?)</dc:creator>", readfile))
+def find_authors(in_text) :
+    '''finds authors in odt conten xml file '''
+    # TODO: the string can be made universal
+
+    authors = set(re.findall("<dc:creator>(.*?)</dc:creator>", in_text))
     authors_dict = {}
     counter = 1
     for i in authors :
@@ -70,14 +82,14 @@ def find_authors(filename) :
         authors_dict[index] =  i
         counter += 1
 
-    f.close()
-
     return authors_dict
 
 
 # Let's run it
 
-unzip_file(zipped_file_name)
+type = unzip_file(zipped_file_name)
+
+print(f"type is {type}")
 
 authors_list = find_authors(textfile)
 
