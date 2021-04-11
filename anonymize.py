@@ -8,10 +8,20 @@ textfile = export_dir + "/content.xml"
 
 def unzip_file(orig_file) :
   print(orig_file)
-  mimetype = mimetypes.guess_type(orig_file)
+  type = mimetypes.guess_type(orig_file)
+
+  if type[0] == "application/vnd.oasis.opendocument.text" :
+    print("It's a boy!")
+    filetype = "odt"
+  elif type[0] == "application/vnd.openxmlformats-officedocument.wordprocessingml.document" :
+    print("It's a girl docx")
+    filetype = "docx"
+  else :
+    print("It's a monkey!")
+
   shutil.unpack_archive(zipped_file_name, export_dir, 'zip')
 
-  return mimetype
+  return filetype
 
 def replace_text(target_string, from_string, to_string) :
   ''' gets input string to replace ad substitutes it with the corresponding string in target file'''
@@ -88,15 +98,13 @@ def find_authors(in_text) :
 # Let's run it
 
 type = unzip_file(zipped_file_name)
-print(type)
 
-if type[0] == "application/vnd.oasis.opendocument.text" :
-    print("It's a boy!")
-elif type[0] == "application/vnd.openxmlformats-officedocument.wordprocessingml.document" :
-    print("It's a girl docx")
+if type[0] == "odt" or  "doc" :
+    print("let'z continue!")
 
 else :
     print("It's a monkey!")
+    sys.exit('not do')
 
 
 cycle_ask(textfile)
