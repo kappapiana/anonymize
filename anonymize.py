@@ -1,16 +1,31 @@
+import os, sys, re, shutil, mimetypes, glob
 
+# Get the first argument as the modified file
 zipped_file_name = sys.argv[1]
 
+# Set the relevant part to be changed in file source
 odt_string = "<dc:creator>(.*?)</dc:creator>"
 doc_string = "w:author=\"(.*?)\""
 
-
+# other variables
 cwd = os.getcwd()
-export_dir = "/tmp/test"
-textfile = export_dir + "/content.xml"
+export_dir = "/tmp/test/"
+
+# Clean working directory
+
+def cleanup_dir() :
+    ''' cleans the working directory, using the global variable
+    no need to pass arguments '''
+
+    dir = export_dir
+    for files in os.listdir(dir):
+        path = os.path.join(dir, files)
+        try:
+            shutil.rmtree(path)
+        except OSError:
+            os.remove(path)
 
 def unzip_file(orig_file) :
-  print(orig_file)
 
   type = mimetypes.guess_type(orig_file)
 
@@ -100,19 +115,22 @@ def find_authors(in_text) :
 
 # Let's run it
 
+cleanup_dir()
+
 type = unzip_file(zipped_file_name)
 
 # we establish what kind of string is the author
 
 if type == "odt" :
     author_string = odt_string
-    textfile = export_dir + "/content.xml"
+    textfile = export_dir + "content.xml"
 elif type == "docx" :
     author_string = doc_string
-    textfile = export_dir + "/word/comments.xml"
+    textfile = export_dir + "word/comments.xml"
 else :
     print("It's a monkey!")
     sys.exit('not do')
+    cleanup_dir()
 
 
 cycle_ask(textfile)
@@ -121,8 +139,8 @@ anonymized = rezip()
 
 print(f"file is now in {anonymized}")
 
+cleanup_dir()
 
 # TODO:
-# - make target file and regexp for docx
-# - automagically recognize fileformat and decide which function
-# - make function class and subclasses for odt and docx
+
+# Create menu and select from menu 
