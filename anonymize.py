@@ -88,12 +88,16 @@ def find_authors(in_text) :
 # Let's run it
 
 type = unzip_file(zipped_file_name)
+print(type)
 
-print(f"type is {type}")
+if type[0] == "application/vnd.oasis.opendocument.text" :
+    print("It's a boy!")
+elif type[0] == "application/vnd.openxmlformats-officedocument.wordprocessingml.document" :
+    print("It's a girl docx")
 
-authors_list = find_authors(textfile)
+else :
+    print("It's a monkey!")
 
-print(f"authors are {authors_list}")
 
 cycle_ask(textfile)
 
