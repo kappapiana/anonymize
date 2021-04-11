@@ -10,37 +10,39 @@ def unzip_file(orig_file) :
   print(orig_file)
   shutil.unpack_archive(zipped_file_name, export_dir, 'zip')
 
+def replace_text(readfile, from_string, to_string) :
+  ''' gets input string to replace ad substitutes it with the corresponding string'''
 
-def replace_text(filename) :
-  ''' opens the file ad substitutes
-  the corresponding string'''
+  print(f"now I open {readfile}")
 
-  f = open(filename, 'r')
+  f = open(readfile, 'r')
 
-  # regexp = "r" + "\"" + regexp + "\""
+  search_replace = re.sub(from_string, to_string, f)
 
-  # setting flag and index to 0
-  flag = 0
-  index = 0
+  print(f" is: {search_replace}")
 
-  readfile = f.read()
-
-  from_string = ""
-  f.close()
-
-  while from_string != "quit" :
-
-      from_string = input("\nPlease enter the string you want to change **from**\nIf you want to end, enter \"quit\" \n :> ")
-
-      if from_string != "quit" :
-          f = open(filename, 'w')
-          for_string = input("\nPlease enter the string you want to change **to** \n\n :> ")
-
-          search_replace = re.sub(from_string, for_string, readfile)
-
-          f.write(search_replace)
+  f.write(search_replace)
 
   f.close()
+
+
+
+def cycle_ask(cur_filename) :
+
+    while  True :
+
+        from_string = input("\nPlease enter the string you want to change **from**\nIf you want to end, enter \"quit\" \n :> ")
+
+        for_string = input("\nPlease enter the string you want to change **to** \n\n :> ")
+
+        replace_text(cur_filename, from_string, for_string)
+
+        if input('Do You Want To Continue? [enter "stop" to stop | leave empty to continue]') == 'stop' :
+          print("ok, we stop here")
+          break
+
+        else :
+          print("another time")
 
 def rezip() :
 
@@ -81,7 +83,7 @@ authors_list = find_authors(textfile)
 
 print(f"authors are {authors_list}")
 
-replace_text(textfile)
+cycle_ask(textfile)
 
 anonymized = rezip()
 
