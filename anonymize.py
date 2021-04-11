@@ -1,6 +1,9 @@
-import os, sys, re, shutil, mimetypes
 
 zipped_file_name = sys.argv[1]
+
+odt_string = "<dc:creator>(.*?)</dc:creator>"
+doc_string = "w:author=\"(.*?)\""
+
 
 cwd = os.getcwd()
 export_dir = "/tmp/test"
@@ -8,13 +11,13 @@ textfile = export_dir + "/content.xml"
 
 def unzip_file(orig_file) :
   print(orig_file)
+
   type = mimetypes.guess_type(orig_file)
 
   if type[0] == "application/vnd.oasis.opendocument.text" :
     print("It's a boy!")
     filetype = "odt"
   elif type[0] == "application/vnd.openxmlformats-officedocument.wordprocessingml.document" :
-    print("It's a girl docx")
     filetype = "docx"
   else :
     print("It's a monkey!")
@@ -81,10 +84,10 @@ def rezip() :
   return anon_textfile
 
 def find_authors(in_text) :
-    '''finds authors in odt conten xml file '''
+    '''finds authors in content xml file '''
     # TODO: the string can be made universal
 
-    authors = set(re.findall("<dc:creator>(.*?)</dc:creator>", in_text))
+    authors = set(re.findall(author_string, in_text))
     authors_dict = {}
     counter = 1
     for i in authors :
@@ -99,9 +102,14 @@ def find_authors(in_text) :
 
 type = unzip_file(zipped_file_name)
 
-if type[0] == "odt" or  "doc" :
-    print("let'z continue!")
+# we establish what kind of string is the author
 
+if type == "odt" :
+    author_string = odt_string
+    textfile = export_dir + "/content.xml"
+elif type == "docx" :
+    author_string = doc_string
+    textfile = export_dir + "/word/comments.xml"
 else :
     print("It's a monkey!")
     sys.exit('not do')
