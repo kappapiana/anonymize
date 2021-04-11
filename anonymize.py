@@ -51,62 +51,96 @@ def replace_text(target_string, from_string, to_string) :
 
 def cycle_ask(cur_filename) :
     '''opens and reads file to be changed, asks for input until user is fine
-    then writes the changed string.'''
+    then writes the changed string, until you call it quits'''
 
     f = open(cur_filename, 'r')
     target_string = f.read()
 
-    print(find_authors(target_string))
-
     while  True :
 
-        from_string = input("\nPlease enter the string you want to change **from**\n\n :> ")
+        authors_list = find_authors(target_string)
 
-        for_string = input("\nPlease enter the string you want to change **to** \n\n :> ")
+        # Add more commands to the list of possible authors
+        additional_commands = {
+        "all": "all",
+        "quit": "quit"
+        }
 
-        changed_text = replace_text(target_string, from_string, for_string)
+        commands = {**authors_list, **additional_commands}
 
-        if input('Do You Want To Continue? [enter "stop" to stop | leave empty to continue]') == 'stop' :
-        # We have finished changing the target string, write it into the file.
-          print("ok, we stop here")
-          f.close()
-          f = open(cur_filename, 'w')
-          f.write(changed_text)
-          f.close()
-          break
+        # Present the selection menu
+        print("*** \nSelect values that you want to change from this  list, or all, or quit:")
+        for key in commands :
+            print(f"{key}: {commands.get(key)}")
 
+        from_string = commands.get(input("\n:> "))
+
+        if from_string == None :
+            print(from_string)
+            print("You definitely should use one of the keys")
+
+        # If you select quit, we are over
+        elif from_string == "quit" :
+            # We have finished changing the target string, write it into the file.
+            print("ok, we stop here")
+            f.close()
+            try :
+                f = open(cur_filename, 'w')
+                f.write(changed_text)
+                f.close()
+            except :
+                print("we have not changed a thing")
+
+            break
+
+        elif from_string == "all" :
+            print(f"You have selected to change all values")
+            for_string = input("\nPlease enter the string you want to change **to** \n\n :> ")
+
+            for key in authors_list :
+                from_string = authors_list.get(key)
+                changed_text = replace_text(target_string, from_string, for_string)
+                target_string = changed_text
+
+        # othewise, you have selected a good key, let's replace it with something
+        # and start over
         else :
+            print(f"You have selected {from_string}")
+            for_string = input("\nPlease enter the string you want to change **to** \n\n :> ")
 
-        # the target string must be the modified string this time:
-          print("another time -- authors are: \n")
-          print(find_authors(changed_text))
-          target_string = changed_text
+            changed_text = replace_text(target_string, from_string, for_string)
+
+
+            # the target string must be the modified string this time:
+
+            target_string = changed_text
 
 
 def rezip() :
+    '''rewraps everyting'''
 
-  anon_textfile = cwd + "/_anon_" + zipped_file_name
+    anon_textfile = cwd + "/_anon_" + zipped_file_name
 
-  # Recreate a version of the file with the new content in it
-  shutil.make_archive(anon_textfile, "zip", export_dir)
+    # Recreate a version of the file with the new content in it
+    shutil.make_archive(anon_textfile, "zip", export_dir)
 
-  anon_textfile_zip = anon_textfile + ".zip"
+    anon_textfile_zip = anon_textfile + ".zip"
 
-  # Rename it to the original extension FIXME: this is a hack
-  os.rename(anon_textfile_zip, anon_textfile)
+    # Rename it to the original extension FIXME: this is a hack
+    os.rename(anon_textfile_zip, anon_textfile)
 
-  # function returns the name of the changed file
-  return anon_textfile
+    # function returns the name of the changed file
+    return anon_textfile
 
 def find_authors(in_text) :
-    '''finds authors in content xml file '''
-    # TODO: the string can be made universal
+    '''finds and lists authors in content xml file returnin a dictionary
+    of values '''
 
     authors = set(re.findall(author_string, in_text))
     authors_dict = {}
     counter = 1
     for i in authors :
-        index = f"author {counter}"
+        index = str(counter)
         authors_dict[index] =  i
         counter += 1
 
@@ -117,21 +151,20 @@ def find_authors(in_text) :
 
 cleanup_dir()
 
-type = unzip_file(zipped_file_name)
+file_type = unzip_file(zipped_file_name)
 
 # we establish what kind of string is the author
 
-if type == "odt" :
+if file_type == "odt" :
     author_string = odt_string
     textfile = export_dir + "content.xml"
-elif type == "docx" :
+elif file_type == "docx" :
     author_string = doc_string
     textfile = export_dir + "word/comments.xml"
 else :
     print("It's a monkey!")
     sys.exit('not do')
     cleanup_dir()
-
 
 cycle_ask(textfile)
 
@@ -142,5 +175,3 @@ print(f"file is now in {anonymized}")
 cleanup_dir()
 
 # TODO:
-
-# Create menu and select from menu 
