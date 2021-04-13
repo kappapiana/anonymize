@@ -186,7 +186,7 @@ def cycle_ask(cur_filename) :
 def rezip() :
     '''rewraps everyting'''
 
-    anon_textfile = cwd + "/_anon_" + zipped_file_name
+    anon_textfile = os.path.join(cwd, '_anon_') + zipped_file_name
 
     # Recreate a version of the file with the new content in it
     shutil.make_archive(anon_textfile, "zip", export_dir)
@@ -227,7 +227,7 @@ if file_type == "odt" :
     textfile = export_dir + "content.xml"
 elif file_type == "docx" :
     author_string = doc_string
-    textfile = export_dir + "word/comments.xml"
+    textfile = os.path.join(export_dir, 'word', '') + "comments.xml"
 else :
     print("It's a monkey!")
     sys.exit('not do')
