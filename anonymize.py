@@ -49,21 +49,42 @@ doc_string = "w:author=\"(.*?)\""
 
 # other variables
 cwd = os.getcwd()
-export_dir = "/tmp/test/"
 
-# Clean working directory
-
-def cleanup_dir() :
+def cleanup_dir(dir = "/tmp/test/") :
     ''' cleans the working directory, using the global variable
     no need to pass arguments '''
 
-    dir = export_dir
-    for files in os.listdir(dir):
-        path = os.path.join(dir, files)
+    if  os.path.isdir(dir) == True :
+        print("OK")
+
+        for files in os.listdir(dir):
+            path = os.path.join(dir, files)
+            try:
+                shutil.rmtree(path)
+            except OSError:
+                os.remove(path)
+    else :
         try:
-            shutil.rmtree(path)
+            os.mkdir(dir)
         except OSError:
-            os.remove(path)
+            print ("\nCreation of the directory %s failed" % dir )
+
+            # Creates dir with trailing slash even if not in input, oftentimes people don't add
+            dir = os.path.join(input("insert alternative temporary directory \n:> "), '')
+
+            if  os.path.isdir(dir) == True : # if dir exists already, use it
+                pass
+            elif os.path.isfile(dir) == True : # it's a file, cant use this
+                print(f"sorry {dir} is an existing file can't create dir")
+                print(f"make sure to find another directory where you have permissions")
+                sys.exit('...quitting.')
+            else :
+                os.mkdir(dir)
+        else:
+            print ("\nSuccessfully created the directory %s " % dir )
+
+    return dir
+
 
 def unzip_file(orig_file) :
     '''odt and docx are zip. We send them to a convenient location and work on
@@ -195,7 +216,7 @@ def find_authors(in_text) :
 
 # Let's run it
 
-cleanup_dir()
+export_dir = cleanup_dir()
 
 file_type = unzip_file(zipped_file_name)
 
@@ -221,3 +242,5 @@ print(f"file is now in {anonymized}")
 cleanup_dir()
 
 # TODO:
+
+# Add create dir
