@@ -2,6 +2,8 @@
 
 This script `anonymize.sh` does one thing and hopefully it does it well. It allows changing the metadata to comment and track changes and hopefully also other metadata to a document.
 
+**UPDATE** now available in python (experimental)
+
 ## Rationale
 
 The idea came from working as an editor of a peer-reviewed journal (see https://jolts.world).
@@ -25,7 +27,11 @@ But I also needed that the many time (most of the time) when I have to clean up 
 
 So it will also work with docx (OOXML text document), although MS Word® has a feature to change data as an afterthought (but all or none, AFAICR) and this script might not be strictly necessary.
 
-# HOWTO
+## Fourth thought, python3
+
+I have attempted a porting to python3, actually everything has been rewritten with some more sense. It should work for any operating system, as I have abstracted the paths via the `os` library. Hopefully.
+
+# HOWTO BASH
 
 Requires a recently updated version of Linux (I target bash 4.0, roughly), preferably git (but it's not necessary) and a working knowledge of running scripts. The easiest way is to clone the repository somewhere and point to the script from the command line.
 
@@ -55,6 +61,20 @@ cd ~/documents/
 It will interact with you asking if you want to change everything in one go or one author by one. Eventually you will (hopefully) have a file named like `_anonymized_doc.odt`. I'm not copying it over so that you can review the result without risking to destroy everything...
 
 
+# HOWTO python
+
+It should be sufficient to have a running python3 environment, the imported libraries are all from the standard set.
+
+just run
+
+```
+[script_directory]/anonymize.py filename.[odt|docx]
+
+```
+
+from any directory and it should produce a copy with `_anon_` prepended to the filename
+
+
 ## TODO
 
-- [ ] make it work from other directories
+- [ ] make it work from other directories (done for python!)
