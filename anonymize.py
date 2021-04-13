@@ -28,6 +28,18 @@
 
 import os, sys, re, shutil, mimetypes, glob
 
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKCYAN = '\033[96m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
+
 # Get the first argument as the modified file
 zipped_file_name = sys.argv[1]
 
@@ -54,7 +66,6 @@ def cleanup_dir() :
             os.remove(path)
 
 def unzip_file(orig_file) :
-
   type = mimetypes.guess_type(orig_file)
 
   if type[0] == "application/vnd.oasis.opendocument.text" :
@@ -97,15 +108,15 @@ def cycle_ask(cur_filename) :
         commands = {**authors_list, **additional_commands}
 
         # Present the selection menu
-        print("*** \nSelect values that you want to change from this  list, or all, or quit:")
+        print("\nSelect values that you want to change from this  list, or a fro all, or q to quit:\n")
         for key in commands :
             print(f"{key}: {commands.get(key)}")
 
-        from_string = commands.get(input("\n:> "))
+        from_string = commands.get(input(f"\n{bcolors.BOLD}\n:> {bcolors.ENDC} ")) #gets the value from input key
 
         if from_string == None :
-            print(from_string)
-            print("You definitely should use one of the keys")
+            print(f"{bcolors.WARNING} \nyou have selected {from_string} but admissible values are the ones presented to you {bcolors.ENDC}")
+            print(f"You {bcolors.BOLD}definitely{bcolors.ENDC} should use one of those keys: \n")
 
         # If you select quit, we are over
         elif from_string == "quit" :
@@ -116,14 +127,16 @@ def cycle_ask(cur_filename) :
                 f = open(cur_filename, 'w')
                 f.write(changed_text)
                 f.close()
-            except :
+            except Exception as e:
+                str(e)
+                print(e)
                 print("we have not changed anything")
 
             break
 
         elif from_string == "all" :
             print(f"You have selected to change all values")
-            for_string = input("\nPlease enter the string you want to change **to** \n\n :> ")
+            for_string = input(f"\nPlease enter the string you want to change {bcolors.BOLD}to{bcolors.ENDC} \n\n:> ")
 
             for key in authors_list :
                 from_string = authors_list.get(key)
@@ -134,7 +147,7 @@ def cycle_ask(cur_filename) :
         # and start over
         else :
             print(f"You have selected {from_string}")
-            for_string = input("\nPlease enter the string you want to change **to** \n\n :> ")
+            for_string = input(f"\nPlease enter the string you want to change {bcolors.BOLD}to{bcolors.ENDC} \n\n:> ")
 
             changed_text = replace_text(target_string, from_string, for_string)
 
