@@ -1,3 +1,13 @@
+<!--
+ *---------------------------------------------------------------------------
+    SPDX-FileCopyrightText: Carlo Piana <kappa@piana.eu>
+
+    SPDX-License-Identifier: CC0-1.0
+ *---------------------------------------------------------------------------
+ -->
+
+[![REUSE status](https://api.reuse.software/badge/github.com/kappapiana/anonymize)](https://api.reuse.software/info/github.com/kappapiana/anonymize)
+
 # ODF and DOCX anonymizer
 
 This script `anonymize.sh` does one thing and hopefully it does it well. It allows changing the metadata to comment and track changes and hopefully also other metadata to a document.
