@@ -66,22 +66,25 @@ def cleanup_dir() :
             os.remove(path)
 
 def unzip_file(orig_file) :
-  type = mimetypes.guess_type(orig_file)
+    '''odt and docx are zip. We send them to a convenient location and work on
+    that extracted stuff. Also, we check if the file type is correct, else, we
+    abort, since we don't know how to handle different files'''
 
-  if type[0] == "application/vnd.oasis.opendocument.text" :
-    print("It's a boy!")
-    filetype = "odt"
-  elif type[0] == "application/vnd.openxmlformats-officedocument.wordprocessingml.document" :
-    filetype = "docx"
-  else :
-    print("It's a monkey!")
+    type = mimetypes.guess_type(orig_file)
+    if type[0] == "application/vnd.oasis.opendocument.text" :
+        print("It's a boy!")
+        filetype = "odt"
+    elif type[0] == "application/vnd.openxmlformats-officedocument.wordprocessingml.document" :
+        filetype = "docx"
+    else :
+        print("It's a monkey!")
 
-  shutil.unpack_archive(zipped_file_name, export_dir, 'zip')
-
-  return filetype
+    shutil.unpack_archive(zipped_file_name, export_dir, 'zip')
+    return filetype
 
 def replace_text(target_string, from_string, to_string) :
-  ''' gets input string to replace ad substitutes it with the corresponding string in target file'''
+  ''' gets input string to replace ad substitutes it with the corresponding
+  string in target file, very simple and straightforward'''
 
   search_replace = re.sub(from_string, to_string, target_string)
 
@@ -90,10 +93,12 @@ def replace_text(target_string, from_string, to_string) :
 
 def cycle_ask(cur_filename) :
     '''opens and reads file to be changed, asks for input until user is fine
-    then writes the changed string, until you call it quits'''
+    then writes the changed string, until you call it quits. This is sort of the
+    main function here'''
 
     f = open(cur_filename, 'r')
     target_string = f.read()
+    changed_text = "" # this will avoid errors when quitting without changing
 
     while  True :
 
@@ -101,8 +106,8 @@ def cycle_ask(cur_filename) :
 
         # Add more commands to the list of possible authors
         additional_commands = {
-        "all": "all",
-        "quit": "quit"
+        "a": "all",
+        "q": "quit"
         }
 
         commands = {**authors_list, **additional_commands}
