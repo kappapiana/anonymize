@@ -26,7 +26,15 @@
 #    to learn a bit of python.
 # *---------------------------------------------------------------------------
 
-import os, sys, re, shutil, mimetypes, glob
+import os
+import sys
+import re
+import shutil
+import mimetypes
+from pathlib import Path
+
+cwd = Path.cwd()  # Current directory is cwd
+
 
 class bcolors:
     HEADER = '\033[95m'
@@ -47,14 +55,12 @@ zipped_file_name = sys.argv[1]
 odt_string = "<dc:creator>(.*?)</dc:creator>"
 doc_string = "w:author=\"(.*?)\""
 
-# other variables
-cwd = os.getcwd()
 
-def cleanup_dir(dir = "/tmp/test/") :
+def cleanup_dir(dir="/tmp/test/"):
     ''' cleans the working directory, using the global variable
     no need to pass arguments '''
 
-    if  os.path.isdir(dir) == True :
+    if os.path.isdir(dir) is True:
         print("OK")
 
         for files in os.listdir(dir):
@@ -63,93 +69,97 @@ def cleanup_dir(dir = "/tmp/test/") :
                 shutil.rmtree(path)
             except OSError:
                 os.remove(path)
-    else :
+    else:
         try:
             os.mkdir(dir)
         except OSError:
-            print ("\nCreation of the directory %s failed" % dir )
+            print("\nCreation of the directory %s failed" % dir)
 
-            # Creates dir with trailing slash even if not in input, oftentimes people don't add
+            # Creates dir with trailing slash even if not in input
+            # oftentimes people don't add
             dir = os.path.join(input("insert alternative temporary directory \n:> "), '')
 
-            if  os.path.isdir(dir) == True : # if dir exists already, use it
+            if os.path.isdir(dir) is True:  # if dir exists already, use it
                 pass
-            elif os.path.isfile(dir) == True : # it's a file, cant use this
+            elif os.path.isfile(dir) is True:  # it's a file, cant use this
                 print(f"sorry {dir} is an existing file can't create dir")
-                print(f"make sure to find another directory where you have permissions")
+                print("make sure to find another directory where you "
+                      "have permissions")
                 sys.exit('...quitting.')
-            else :
+            else:
                 os.mkdir(dir)
         else:
-            print ("\nSuccessfully created the directory %s " % dir )
+            print("\nSuccessfully created the directory %s " % dir)
 
     return dir
 
 
-def unzip_file(orig_file) :
+def unzip_file(orig_file):
     '''odt and docx are zip. We send them to a convenient location and work on
     that extracted stuff. Also, we check if the file type is correct, else, we
     abort, since we don't know how to handle different files'''
 
     type = mimetypes.guess_type(orig_file)
-    if type[0] == "application/vnd.oasis.opendocument.text" :
+    if type[0] == "application/vnd.oasis.opendocument.text":
         print("It's a boy!")
         filetype = "odt"
-    elif type[0] == "application/vnd.openxmlformats-officedocument.wordprocessingml.document" :
+    elif type[0] == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
         filetype = "docx"
-    else :
+    else:
         print("It's a monkey!")
 
     shutil.unpack_archive(zipped_file_name, export_dir, 'zip')
     return filetype
 
-def replace_text(target_string, from_string, to_string) :
-  ''' gets input string to replace ad substitutes it with the corresponding
-  string in target file, very simple and straightforward'''
 
-  search_replace = re.sub(from_string, to_string, target_string)
+def replace_text(target_string, from_string, to_string):
+    ''' gets input string to replace ad substitutes it with the corresponding
+    string in target file, very simple and straightforward'''
 
-  return search_replace
+    search_replace = re.sub(from_string, to_string, target_string)
+
+    return search_replace
 
 
-def cycle_ask(cur_filename) :
+def cycle_ask(cur_filename):
     '''opens and reads file to be changed, asks for input until user is fine
-    then writes the changed string, until you call it quits. This is sort of the
-    main function here'''
+    then writes the changed string, until you call it quits. This is sort of
+    the main function here'''
 
     f = open(cur_filename, 'r')
     target_string = f.read()
-    changed_text = "" # this will avoid errors when quitting without changing
+    changed_text = ""  # this will avoid errors when quitting without changing
 
-    while  True :
+    while  True:
 
         authors_list = find_authors(target_string)
 
         # Add more commands to the list of possible authors
         additional_commands = {
-        "a": "all",
-        "q": "quit"
+            "a": "all",
+            "q": "quit"
         }
 
         commands = {**authors_list, **additional_commands}
 
         # Present the selection menu
-        print("\nSelect values that you want to change from this  list, or a fro all, or q to quit:\n")
-        for key in commands :
+        print("\nSelect values that you want to change from this"
+              "list, or a fro all, or q to quit:\n")
+        for key in commands:
             print(f"{key}: {commands.get(key)}")
 
         from_string = commands.get(input(f"\n{bcolors.BOLD}\n:> {bcolors.ENDC} ")) #gets the value from input key
 
-        if from_string == None :
+        if from_string is None:
             print(f"{bcolors.WARNING} \nyou have selected {from_string} but admissible values are the ones presented to you {bcolors.ENDC}")
             print(f"You {bcolors.BOLD}definitely{bcolors.ENDC} should use one of those keys: \n")
 
         # If you select quit, we are over
-        elif from_string == "quit" :
-            # We have finished changing the target string, write it into the file.
+        elif from_string == "quit":
+            # We have finished changing the target string, write it into file.
             print("ok, we stop here")
             f.close()
-            try :
+            try:
                 f = open(cur_filename, 'w')
                 f.write(changed_text)
                 f.close()
@@ -160,30 +170,31 @@ def cycle_ask(cur_filename) :
 
             break
 
-        elif from_string == "all" :
-            print(f"You have selected to change all values")
-            for_string = input(f"\nPlease enter the string you want to change {bcolors.BOLD}to{bcolors.ENDC} \n\n:> ")
+        elif from_string == "all":
+            print("\nYou have selected to change all values"
+                  "\nPlease enter the string you want to change"
+                  f" {bcolors.BOLD}to{bcolors.ENDC} \n")
 
-            for key in authors_list :
+            for_string = input(":> ")
+
+            for key in authors_list:
                 from_string = authors_list.get(key)
                 changed_text = replace_text(target_string, from_string, for_string)
                 target_string = changed_text
 
-        # othewise, you have selected a good key, let's replace it with something
-        # and start over
-        else :
+        # othewise, you have selected a good key, let's replace it with
+        # something and start over
+        else:
             print(f"You have selected {from_string}")
             for_string = input(f"\nPlease enter the string you want to change {bcolors.BOLD}to{bcolors.ENDC} \n\n:> ")
 
             changed_text = replace_text(target_string, from_string, for_string)
 
-
             # the target string must be the modified string this time:
-
             target_string = changed_text
 
 
-def rezip() :
+def rezip():
     '''rewraps everyting'''
 
     anon_textfile = os.path.join(cwd, '_anon_') + zipped_file_name
@@ -199,16 +210,17 @@ def rezip() :
     # function returns the name of the changed file
     return anon_textfile
 
-def find_authors(in_text) :
+
+def find_authors(in_text):
     '''finds and lists authors in content xml file returnin a dictionary
     of values '''
 
     authors = set(re.findall(author_string, in_text))
     authors_dict = {}
     counter = 1
-    for i in authors :
+    for i in authors:
         index = str(counter)
-        authors_dict[index] =  i
+        authors_dict[index] = i
         counter += 1
 
     return authors_dict
@@ -222,13 +234,13 @@ file_type = unzip_file(zipped_file_name)
 
 # we establish what kind of string is the author
 
-if file_type == "odt" :
+if file_type == "odt":
     author_string = odt_string
     textfile = export_dir + "content.xml"
-elif file_type == "docx" :
+elif file_type == "docx":
     author_string = doc_string
     textfile = os.path.join(export_dir, 'word', '') + "comments.xml"
-else :
+else:
     print("It's a monkey!")
     sys.exit('not do')
     cleanup_dir()
