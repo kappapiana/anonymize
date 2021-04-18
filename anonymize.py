@@ -216,9 +216,10 @@ def find_authors(in_text):
     of values '''
 
     authors = set(re.findall(author_string, in_text))
+    author_list = sorted(authors, key= lambda s: s.lower())  # sort in lowercase
     authors_dict = {}
     counter = 1
-    for i in authors:
+    for i in author_list:
         index = str(counter)
         authors_dict[index] = i
         counter += 1
