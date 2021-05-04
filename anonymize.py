@@ -130,7 +130,7 @@ def cycle_ask(cur_filename):
     target_string = f.read()
     changed_text = ""  # this will avoid errors when quitting without changing
 
-    while  True:
+    while True:
 
         authors_list = find_authors(target_string)
 
@@ -148,7 +148,8 @@ def cycle_ask(cur_filename):
         for key in commands:
             print(f"{key}: {commands.get(key)}")
 
-        from_string = commands.get(input(f"\n{bcolors.BOLD}\n:> {bcolors.ENDC} ")) #gets the value from input key
+        # gets the value from input key
+        from_string = commands.get(input(f"\n{bcolors.BOLD}\n:> {bcolors.ENDC} "))
 
         if from_string is None:
             print(f"{bcolors.WARNING} \nyou have selected {from_string} but admissible values are the ones presented to you {bcolors.ENDC}")
