@@ -213,7 +213,7 @@ def rezip():
 
 
 def find_authors(in_text):
-    '''finds and lists authors in content xml file returnin a dictionary
+    '''finds and lists authors in content xml file returning a dictionary
     of values '''
 
     authors = set(re.findall(author_string, in_text))
@@ -234,7 +234,7 @@ export_dir = cleanup_dir()
 
 file_type = unzip_file(zipped_file_name)
 
-# we establish what kind of string is the author
+# we establish what kind of string is the original file
 
 if file_type == "odt":
     author_string = odt_string
