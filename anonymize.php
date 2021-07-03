@@ -2,6 +2,10 @@
 
 $zipFile = 'Document.docx'; // PASS TO FUNCTION
 
+if (file_exists($zipFile) === false) { // Validate file
+    throw new \Exception('Cannot find archive file.');
+}
+
 $zip = new \ZipArchive();
 $zip->open($zipFile);
 
@@ -21,11 +25,6 @@ $regex = [
     "/(creator>).*?(<)/",
     "/(lastModifiedBy>).*?(<)/",
 ];
-
-if (file_exists($zipFile) === false) { // Validate file
-    throw new \Exception('Cannot find archive file.');
-}
-
 
 for( $i = 0; $i < $zip->numFiles; $i++ ){ 
     if (pathinfo($zip->getNameIndex($i), PATHINFO_EXTENSION) == 'xml'){
