@@ -84,6 +84,9 @@ just run
 
 from any directory and it should produce a copy with `_anon_` prepended to the filename
 
+# HOWTO PHP
+
+Since `docx` are just zip files, `ZipArchive` will need to be installed and enabled. This was designed to be run on a webserver. Also, the PHP version **does overwrite** the docx file. Most likely you will need to put this in a funciton and assign `$zipFile` with the path to the file.
 
 ## TODO
 
