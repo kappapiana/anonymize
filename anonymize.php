@@ -3,7 +3,9 @@
 $zipFile = 'Document.docx'; // PASS TO FUNCTION
 
 $zip = new \ZipArchive();
-$zip->open($zipFile);
+if ($zip->open($zipFile)) {
+    return false;
+}
 
 /**
  * To add new item, basic regex is
@@ -14,8 +16,9 @@ $zip->open($zipFile);
  * replace statement can be generalized to $1$2, meaning, part 1 + part 2
  */
 $regex = [
-    "/(w:author=\").*?(\")/",
-    "/(w:initials=\").*?(\")/",
+    "/(author=\").*?(\")/",
+    "/(initials=\").*?(\")/",
+    "/(name=\").*?(\")/",
     "/(userId=\").*?(\")/",
     "/(By>).*?(<)/",
     "/(creator>).*?(<)/",
@@ -46,3 +49,4 @@ for( $i = 0; $i < $zip->numFiles; $i++ ){
     }
 }
 $zip->close();
+return true;
