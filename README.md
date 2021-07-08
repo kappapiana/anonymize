@@ -86,8 +86,15 @@ from any directory and it should produce a copy with `_anon_` prepended to the f
 
 # HOWTO PHP
 
+<<<<<<< HEAD
 Since `docx` are just zip files, `ZipArchive` will need to be installed and enabled. This was designed to be run on a webserver. Also, the PHP version **does overwrite** the docx file. Most likely you will need to put this in a funciton and assign `$zipFile` with the path to the file. This version will also remove the name from the comments in `pptx` files.
+=======
+We have a third option, contributed by [@AlexOConnorHub](https://github.com/AlexOConnorHub), using `PHP` and likely workable as a function, currently only working on OOXML files (docx, pptx). **Highly experimental**, use it if you know what you are doing.
+
+Since `docx` are just zip files, `ZipArchive` will need to be installed and enabled. This was designed to be run on a webserver. Also, the PHP version **does overwrite** the docx file. Most likely you will need to put this in a function and assign `$zipFile` with the path to the file. This version will also remove the name from the comments in `pptx` files.
+>>>>>>> c92b9df0bc3504534f9d516bf022e206a565063a
 
 ## TODO
 
 - [ ] make it work from other directories (done for python!)
+- [ ] improve PHP version and add safer defaults (not me, I don't do PHP, just yet)
