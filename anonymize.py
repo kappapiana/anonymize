@@ -126,9 +126,23 @@ def cycle_ask(cur_filename):
     then writes the changed string, until you call it quits. This is sort of
     the main function here'''
 
-    f = open(cur_filename, 'r')
-    target_string = f.read()
-    changed_text = ""  # this will avoid errors when quitting without changing
+    target_string = "" # create the variable as an empty string
+    counter = 0
+
+    for file in cur_filename:
+        if os.path.exists(file):
+
+            f = open(file, 'r')
+            target_string_temp = f.read()
+            target_string = f'{target_string} {target_string_temp}'
+            changed_text = ""  # this will avoid errors when quitting without changing
+            print("\nWe read", file)
+            counter +=1
+            print(counter)
+
+        else :
+            print("\nThe search file is missing:", file)
+
 
     while True:
 
@@ -139,6 +153,8 @@ def cycle_ask(cur_filename):
             "a": "all",
             "q": "quit"
         }
+
+        # FIXME: we read the values, but we still can't work out writing the file
 
         commands = {**authors_list, **additional_commands}
 
@@ -241,7 +257,10 @@ if file_type == "odt":
     textfile = export_dir + "content.xml"
 elif file_type == "docx":
     author_string = doc_string
-    textfile = os.path.join(export_dir, 'word', '') + "comments.xml"
+    textfile0 = os.path.join(export_dir, 'word', '') + "document.xml"
+    textfile1 = os.path.join(export_dir, 'word', '') + "comments.xml"
+    textfile = [textfile0, textfile1]
+
 else:
     print("It's a monkey!")
     sys.exit('not do')
