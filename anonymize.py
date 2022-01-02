@@ -61,7 +61,6 @@ def cleanup_dir(dir="/tmp/test/"):
     no need to pass arguments '''
 
     if os.path.isdir(dir) is True:
-        print("OK")
 
         for files in os.listdir(dir):
             path = os.path.join(dir, files)
@@ -120,25 +119,53 @@ def replace_text(target_string, from_string, to_string):
 
     return search_replace
 
+def create_megastring(unzipped_files):
+
+    '''accepts an array of files and appends the content, so we search
+    everything'''
+
+    target_string = "" # create the variable as an empty string
+    counter = 0
+
+
+    for file in unzipped_files:
+
+        if os.path.exists(file):
+
+            f = open(file, 'r')
+            target_string_temp = f.read()
+            target_string = f'{target_string} {target_string_temp}'
+            changed_text = ""  # this will avoid errors when quitting without changing
+            print("\nWe read", file)
+            counter +=1
+            print(counter)
+            f.close()
+
+        else :
+            print("\nThe search file is missing:", file)
+
+    return(target_string)
+
 
 def cycle_ask(cur_filename):
     '''opens and reads file to be changed, asks for input until user is fine
     then writes the changed string, until you call it quits. This is sort of
     the main function here'''
 
-    f = open(cur_filename, 'r')
-    target_string = f.read()
-    changed_text = ""  # this will avoid errors when quitting without changing
 
     while True:
 
-        authors_list = find_authors(target_string)
+         # here we find
+
+        authors_list = find_authors(create_megastring(cur_filename))
 
         # Add more commands to the list of possible authors
         additional_commands = {
             "a": "all",
             "q": "quit"
         }
+
+        # FIXME: we read the values, but we still can't work out writing the file
 
         commands = {**authors_list, **additional_commands}
 
@@ -159,15 +186,18 @@ def cycle_ask(cur_filename):
         elif from_string == "quit":
             # We have finished changing the target string, write it into file.
             print("ok, we stop here")
-            f.close()
+            # f.close()
             try:
-                f = open(cur_filename, 'w')
-                f.write(changed_text)
-                f.close()
+                test = target_string_local
+                len(test)
+
+            #     f = open(cur_filename, 'w')
+            #     f.write(changed_text)
+            #     f.close()
             except Exception as e:
                 str(e)
                 print(e)
-                print("we have not changed anything")
+                print(f"\n{bcolors.BOLD}*** we have not changed anything{bcolors.ENDC} *** \n")
 
             break
 
@@ -176,23 +206,41 @@ def cycle_ask(cur_filename):
                   "\nPlease enter the string you want to change"
                   f" {bcolors.BOLD}to{bcolors.ENDC} \n")
 
-            for_string = input(":> ")
+            to_string = input(":> ")
 
-            for key in authors_list:
-                from_string = authors_list.get(key)
-                changed_text = replace_text(target_string, from_string, for_string)
-                target_string = changed_text
+            for file in cur_filename:
+
+                k = open(file, 'r')
+                target_string_local = k.read()
+
+                for key in authors_list:
+                    from_string = authors_list.get(key)
+                    changed_text = replace_text(target_string_local, from_string, to_string)
+                    target_string_local = changed_text
+
+                k.close()
+                k = open(file, 'w')
+                k.write(changed_text)
+                k.close()
 
         # othewise, you have selected a good key, let's replace it with
         # something and start over
         else:
             print(f"You have selected {from_string}")
-            for_string = input(f"\nPlease enter the string you want to change {bcolors.BOLD}to{bcolors.ENDC} \n\n:> ")
+            to_string = input(f"\nPlease enter the string you want to change {bcolors.BOLD}to{bcolors.ENDC} \n\n:> ")
 
-            changed_text = replace_text(target_string, from_string, for_string)
+            for file in cur_filename:
 
-            # the target string must be the modified string this time:
-            target_string = changed_text
+                k = open(file, 'r')
+                target_string_local = k.read()
+
+                changed_text = replace_text(target_string_local, from_string, to_string)
+                target_string_local = changed_text
+
+                k.close()
+                k = open(file, 'w')
+                k.write(changed_text)
+                k.close()
 
 
 def rezip():
@@ -238,10 +286,14 @@ file_type = unzip_file(zipped_file_name)
 
 if file_type == "odt":
     author_string = odt_string
-    textfile = export_dir + "content.xml"
+    textfile0 = export_dir + "content.xml"
+    textfile = [textfile0] #just to use a multifile structure, don't change
 elif file_type == "docx":
     author_string = doc_string
-    textfile = os.path.join(export_dir, 'word', '') + "comments.xml"
+    textfile0 = os.path.join(export_dir, 'word', '') + "document.xml"
+    textfile1 = os.path.join(export_dir, 'word', '') + "comments.xml"
+    textfile = [textfile0, textfile1]
+
 else:
     print("It's a monkey!")
     sys.exit('not do')
