@@ -61,7 +61,6 @@ def cleanup_dir(dir="/tmp/test/"):
     no need to pass arguments '''
 
     if os.path.isdir(dir) is True:
-        print("OK")
 
         for files in os.listdir(dir):
             path = os.path.join(dir, files)
@@ -140,6 +139,7 @@ def create_megastring(unzipped_files):
             print("\nWe read", file)
             counter +=1
             print(counter)
+            f.close()
 
         else :
             print("\nThe search file is missing:", file)
@@ -186,15 +186,18 @@ def cycle_ask(cur_filename):
         elif from_string == "quit":
             # We have finished changing the target string, write it into file.
             print("ok, we stop here")
-            f.close()
+            # f.close()
             try:
-                f = open(cur_filename, 'w')
-                f.write(changed_text)
-                f.close()
+                test = target_string_local
+                len(test)
+
+            #     f = open(cur_filename, 'w')
+            #     f.write(changed_text)
+            #     f.close()
             except Exception as e:
                 str(e)
                 print(e)
-                print("we have not changed anything")
+                print(f"\n{bcolors.BOLD}*** we have not changed anything{bcolors.ENDC} *** \n")
 
             break
 
@@ -203,23 +206,41 @@ def cycle_ask(cur_filename):
                   "\nPlease enter the string you want to change"
                   f" {bcolors.BOLD}to{bcolors.ENDC} \n")
 
-            for_string = input(":> ")
+            to_string = input(":> ")
 
-            for key in authors_list:
-                from_string = authors_list.get(key)
-                changed_text = replace_text(target_string, from_string, for_string)
-                target_string = changed_text
+            for file in cur_filename:
+
+                k = open(file, 'r')
+                target_string_local = k.read()
+
+                for key in authors_list:
+                    from_string = authors_list.get(key)
+                    changed_text = replace_text(target_string_local, from_string, to_string)
+                    target_string_local = changed_text
+
+                k.close()
+                k = open(file, 'w')
+                k.write(changed_text)
+                k.close()
 
         # othewise, you have selected a good key, let's replace it with
         # something and start over
         else:
             print(f"You have selected {from_string}")
-            for_string = input(f"\nPlease enter the string you want to change {bcolors.BOLD}to{bcolors.ENDC} \n\n:> ")
+            to_string = input(f"\nPlease enter the string you want to change {bcolors.BOLD}to{bcolors.ENDC} \n\n:> ")
 
-            changed_text = replace_text(target_string, from_string, for_string)
+            for file in cur_filename:
 
-            # the target string must be the modified string this time:
-            target_string = changed_text
+                k = open(file, 'r')
+                target_string_local = k.read()
+
+                changed_text = replace_text(target_string_local, from_string, to_string)
+                target_string_local = changed_text
+
+                k.close()
+                k = open(file, 'w')
+                k.write(changed_text)
+                k.close()
 
 
 def rezip():
