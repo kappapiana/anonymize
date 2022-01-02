@@ -286,7 +286,8 @@ file_type = unzip_file(zipped_file_name)
 
 if file_type == "odt":
     author_string = odt_string
-    textfile = export_dir + "content.xml"
+    textfile0 = export_dir + "content.xml"
+    textfile = [textfile0] #just to use a multifile structure, don't change
 elif file_type == "docx":
     author_string = doc_string
     textfile0 = os.path.join(export_dir, 'word', '') + "document.xml"
