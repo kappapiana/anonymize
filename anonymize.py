@@ -120,16 +120,17 @@ def replace_text(target_string, from_string, to_string):
 
     return search_replace
 
+def create_megastring(unzipped_files):
 
-def cycle_ask(cur_filename):
-    '''opens and reads file to be changed, asks for input until user is fine
-    then writes the changed string, until you call it quits. This is sort of
-    the main function here'''
+    '''accepts an array of files and appends the content, so we search
+    everything'''
 
     target_string = "" # create the variable as an empty string
     counter = 0
 
-    for file in cur_filename:
+
+    for file in unzipped_files:
+
         if os.path.exists(file):
 
             f = open(file, 'r')
@@ -143,10 +144,20 @@ def cycle_ask(cur_filename):
         else :
             print("\nThe search file is missing:", file)
 
+    return(target_string)
+
+
+def cycle_ask(cur_filename):
+    '''opens and reads file to be changed, asks for input until user is fine
+    then writes the changed string, until you call it quits. This is sort of
+    the main function here'''
+
 
     while True:
 
-        authors_list = find_authors(target_string)
+         # here we find
+
+        authors_list = find_authors(create_megastring(cur_filename))
 
         # Add more commands to the list of possible authors
         additional_commands = {
