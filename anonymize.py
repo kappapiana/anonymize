@@ -53,6 +53,8 @@ zipped_file_name = sys.argv[1]
 
 # Set the relevant part to be changed in file source
 odt_string = "<dc:creator>(.*?)</dc:creator>"
+odt_string_initials = "<meta:creator-initials>(.*?)</meta:creator-initials>"
+odt_string_initials_replaced = "<meta:creator-initials></meta:creator-initials>"
 doc_string = "w:author=\"(.*?)\""
 doc_string_initials = "w:initials=\"(.*?)\""
 doc_string_initials_replaced = "w:initials=\"\""
@@ -277,24 +279,31 @@ def find_authors(in_text):
 
     return authors_dict
 
-def delete_initials():
+def delete_initials(is_type):
     '''replaces the content of the w:initials thing with an empty string"'''
 
 
-    if file_type == "docx":
+    if is_type == "docx":
         comments_file = os.path.join(export_dir, 'word', '') + "comments.xml"
-        if os.path.exists(comments_file):
+        initials_replaced = doc_string_initials_replaced
+        initials = doc_string_initials
+    elif is_type == "odt":
+        comments_file = export_dir + "content.xml"
+        initials_replaced = odt_string_initials_replaced
+        initials = odt_string_initials
 
-            with open(comments_file, 'r') as file:
-                data = file.read()
-                data = replace_text(data, doc_string_initials, doc_string_initials_replaced)
+    if os.path.exists(comments_file):
 
+        with open(comments_file, 'r') as file:
+            data = file.read()
+            data = replace_text(data, initials, initials_replaced)
 
-            with open(comments_file, 'w') as file:
-                print(data)
-                file.write(data)
+            print(comments_file)
 
-            print("we have deleted the initials")
+        with open(comments_file, 'w') as file:
+            file.write(data)
+
+        print("we have deleted the initials")
 
 
 # Let's run it
@@ -322,7 +331,7 @@ else:
 
 cycle_ask(textfile)
 
-delete_initials()
+delete_initials(file_type)
 
 anonymized = rezip()
 
