@@ -54,6 +54,8 @@ zipped_file_name = sys.argv[1]
 # Set the relevant part to be changed in file source
 odt_string = "<dc:creator>(.*?)</dc:creator>"
 doc_string = "w:author=\"(.*?)\""
+doc_string_initials = "w:initials=\"(.*?)\""
+doc_string_initials_replaced = "w:initials=\"\""
 
 
 def cleanup_dir(dir="/tmp/test/"):
@@ -149,8 +151,8 @@ def create_megastring(unzipped_files):
 
 def cycle_ask(cur_filename):
     '''opens and reads file to be changed, asks for input until user is fine
-    then writes the changed string, until you call it quits. This is sort of
-    the main function here'''
+    then writes the changed string, until you call it quits. This is sort of the
+    main function here'''
 
 
     while True:
@@ -275,6 +277,25 @@ def find_authors(in_text):
 
     return authors_dict
 
+def delete_initials():
+    '''replaces the content of the w:initials thing with an empty string"'''
+
+
+    if file_type == "docx":
+        comments_file = os.path.join(export_dir, 'word', '') + "comments.xml"
+        if os.path.exists(comments_file):
+
+            with open(comments_file, 'r') as file:
+                data = file.read()
+                data = replace_text(data, doc_string_initials, doc_string_initials_replaced)
+
+
+            with open(comments_file, 'w') as file:
+                print(data)
+                file.write(data)
+
+            print("we have deleted the initials")
+
 
 # Let's run it
 
@@ -301,9 +322,12 @@ else:
 
 cycle_ask(textfile)
 
+delete_initials()
+
 anonymized = rezip()
 
 print(f"file is now in {anonymized}")
+
 
 cleanup_dir()
 
