@@ -10,9 +10,9 @@
 
 # ODF and DOCX anonymizer
 
-This script `anonymize.sh` does one thing and hopefully it does it well. It allows changing the metadata to comment and track changes and hopefully also other metadata to a document.
+This script `anonymize.py` does one thing and hopefully it does it well. It allows changing the metadata to comment and track changes and hopefully also other metadata to a document.
 
-**UPDATE** now available in python (experimental)
+For those better used to `bash` script or not fancy with installing python, `anonymize.sh` is an old and not actively developed (probably broken) verision.
 
 ## Rationale
 
@@ -88,3 +88,4 @@ from any directory and it should produce a copy with `_anon_` prepended to the f
 ## TODO
 
 - [ ] make it work from other directories (done for python!)
+- [ ] opt out removing initials, now it's just done at the end
