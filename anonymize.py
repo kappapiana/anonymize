@@ -235,7 +235,7 @@ def cycle_ask(cur_filename):
                     target_string_local = changed_text
 
                 with open(file, 'w') as k:
-                k.write(changed_text)
+                    k.write(changed_text)
 
 
 def rezip():
