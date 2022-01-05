@@ -36,6 +36,7 @@ from pathlib import Path
 cwd = Path.cwd()  # Current directory is cwd
 
 
+# this is just optional in case we want colors
 class bcolors:
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
@@ -140,9 +141,7 @@ def create_megastring(unzipped_files):
                 target_string_temp = f.read()
                 target_string = f'{target_string} {target_string_temp}'
                 changed_text = ""  # this will avoid errors when quitting without changing
-                print("\nWe read", file)
                 counter +=1
-                print(counter)
 
         else :
             print("\nThe search file is missing:", file)
@@ -190,13 +189,17 @@ def cycle_ask(cur_filename):
             # We have finished changing the target string, write it into file.
             print("ok, we stop here")
             try:
+                # if we have not done anything, this test fails, meaning we have
+                # not changed anything
                 test = target_string_local
                 len(test)
 
             except Exception as e:
                 str(e)
-                print(e)
+                # print(e) #for debugging the error, but it's intentional
+                print("\n++++++++++++++++++++++++++++++++++++")
                 print(f"\n{bcolors.BOLD}*** we have not changed anything{bcolors.ENDC} *** \n")
+                print("++++++++++++++++++++++++++++++++++++\n")
 
             break
 
@@ -248,7 +251,7 @@ def rezip():
 
     anon_textfile_zip = anon_textfile + ".zip"
 
-    # Rename it to the original extension FIXME: this is a hack
+    # Rename it to the original extension
     os.rename(anon_textfile_zip, anon_textfile)
 
     # function returns the name of the changed file
@@ -256,12 +259,13 @@ def rezip():
 
 
 def find_authors(in_text):
-    '''finds and lists authors in content xml file returning a dictionary
-    of values '''
+    '''finds and lists authors in content xml file returning a dictionary of
+    values: this is necessary to know what authors we have since last change '''
 
     authors = set(re.findall(author_string, in_text))
     author_list = sorted(authors, key= lambda s: s.lower())  # sort in lowercase
     authors_dict = {}
+    # assign number to each option, increase for next iteration
     counter = 1
     for i in author_list:
         index = str(counter)
@@ -271,7 +275,8 @@ def find_authors(in_text):
     return authors_dict
 
 def delete_initials(is_type):
-    '''replaces the content of the w:initials thing with an empty string"'''
+    '''replaces the content of the initials tag with an empty string. It doesn't
+    ask for permission though, returns nothing'''
 
 
     if is_type == "docx":
@@ -289,12 +294,12 @@ def delete_initials(is_type):
             data = file.read()
             data = replace_text(data, initials, initials_replaced)
 
-            print(comments_file)
-
         with open(comments_file, 'w') as file:
             file.write(data)
 
-        print("we have deleted the initials")
+            print("\n++++++++++++++++++++++++++++++++++++")
+            print(f"\n{bcolors.OKCYAN}    we have deleted the initials{bcolors.ENDC}\n")
+            print("++++++++++++++++++++++++++++++++++++\n")
 
 
 # Let's run it
@@ -326,7 +331,7 @@ delete_initials(file_type)
 
 anonymized = rezip()
 
-print(f"file is now in {anonymized}")
+print(f"{bcolors.OKGREEN}file is now in {anonymized}{bcolors.ENDC}\n")
 
 
 cleanup_dir()
