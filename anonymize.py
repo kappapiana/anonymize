@@ -136,14 +136,13 @@ def create_megastring(unzipped_files):
 
         if os.path.exists(file):
 
-            f = open(file, 'r')
-            target_string_temp = f.read()
-            target_string = f'{target_string} {target_string_temp}'
-            changed_text = ""  # this will avoid errors when quitting without changing
-            print("\nWe read", file)
-            counter +=1
-            print(counter)
-            f.close()
+            with open(file, 'r') as f:
+                target_string_temp = f.read()
+                target_string = f'{target_string} {target_string_temp}'
+                changed_text = ""  # this will avoid errors when quitting without changing
+                print("\nWe read", file)
+                counter +=1
+                print(counter)
 
         else :
             print("\nThe search file is missing:", file)
@@ -190,14 +189,10 @@ def cycle_ask(cur_filename):
         elif from_string == "quit":
             # We have finished changing the target string, write it into file.
             print("ok, we stop here")
-            # f.close()
             try:
                 test = target_string_local
                 len(test)
 
-            #     f = open(cur_filename, 'w')
-            #     f.write(changed_text)
-            #     f.close()
             except Exception as e:
                 str(e)
                 print(e)
@@ -214,18 +209,16 @@ def cycle_ask(cur_filename):
 
             for file in cur_filename:
 
-                k = open(file, 'r')
-                target_string_local = k.read()
+                with open(file, 'r') as k:
+                    target_string_local = k.read()
 
-                for key in authors_list:
-                    from_string = authors_list.get(key)
-                    changed_text = replace_text(target_string_local, from_string, to_string)
-                    target_string_local = changed_text
+                    for key in authors_list:
+                        from_string = authors_list.get(key)
+                        changed_text = replace_text(target_string_local, from_string, to_string)
+                        target_string_local = changed_text
 
-                k.close()
-                k = open(file, 'w')
-                k.write(changed_text)
-                k.close()
+                with open(file, 'w') as k:
+                    k.write(changed_text)
 
         # othewise, you have selected a good key, let's replace it with
         # something and start over
@@ -235,16 +228,14 @@ def cycle_ask(cur_filename):
 
             for file in cur_filename:
 
-                k = open(file, 'r')
-                target_string_local = k.read()
+                with open(file, 'r') as k:
+                    target_string_local = k.read()
 
-                changed_text = replace_text(target_string_local, from_string, to_string)
-                target_string_local = changed_text
+                    changed_text = replace_text(target_string_local, from_string, to_string)
+                    target_string_local = changed_text
 
-                k.close()
-                k = open(file, 'w')
+                with open(file, 'w') as k:
                 k.write(changed_text)
-                k.close()
 
 
 def rezip():
