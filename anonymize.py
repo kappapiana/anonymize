@@ -172,8 +172,8 @@ def cycle_ask(cur_filename):
         commands = {**authors_list, **additional_commands}
 
         # Present the selection menu
-        print("\nSelect values that you want to change from this"
-              "list, or a fro all, or q to quit:\n")
+        print(f"\nSelect values that you want to change from this "
+              f"list, or {bcolors.OKCYAN}a{bcolors.ENDC} for all, \nor {bcolors.OKCYAN}q{bcolors.ENDC} to quit:\n")
         for key in commands:
             print(f"{key}: {commands.get(key)}")
 
