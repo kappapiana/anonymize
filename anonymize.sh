@@ -45,7 +45,7 @@ curdir=$(pwd)
 an_filename="_anonymized_$1"
 zipdir="/tmp/libreoffice"
 
-mkdir $zipdir 2&> /dev/null
+mkdir $zipdir &> /dev/null
 rm -rf ${zipdir:?}/*
 
 function check_i {
