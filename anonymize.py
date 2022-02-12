@@ -33,9 +33,6 @@ import shutil
 import mimetypes
 from pathlib import Path
 
-cwd = Path.cwd()  # Current directory is cwd
-
-
 # this is just optional in case we want colors
 class bcolors:
     HEADER = '\033[95m'
@@ -48,9 +45,6 @@ class bcolors:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
 
-
-# Get the first argument as the modified file
-zipped_file_name = sys.argv[1]
 
 # Set the relevant part to be changed in file source
 odt_string = "<dc:creator>(.*?)</dc:creator>"
@@ -112,7 +106,7 @@ def unzip_file(orig_file):
     else:
         print("It's a monkey!")
 
-    shutil.unpack_archive(zipped_file_name, export_dir, 'zip')
+    shutil.unpack_archive(orig_file, export_dir, 'zip')
     return filetype
 
 
@@ -241,8 +235,8 @@ def cycle_ask(cur_filename):
                     k.write(changed_text)
 
 
-def rezip():
-    '''rewraps everyting'''
+def rezip(cwd, zipped_file_name):
+    '''rewraps everything'''
 
     anon_textfile = os.path.join(cwd, '_anon_') + zipped_file_name
 
@@ -302,40 +296,46 @@ def delete_initials(is_type):
             print("++++++++++++++++++++++++++++++++++++\n")
 
 
-# Let's run it
 
-export_dir = cleanup_dir()
 
-file_type = unzip_file(zipped_file_name)
+if __name__ == '__main__':
+    cwd = Path.cwd()  # Current directory is cwd
 
-# we establish what kind of string is the original file
+    # Get the first argument as the modified file
+    zipped_file_name = sys.argv[1]
 
-if file_type == "odt":
-    author_string = odt_string
-    textfile0 = export_dir + "content.xml"
-    textfile = [textfile0] #just to use a multifile structure, don't change
-elif file_type == "docx":
-    author_string = doc_string
-    textfile0 = os.path.join(export_dir, 'word', '') + "document.xml"
-    textfile1 = os.path.join(export_dir, 'word', '') + "comments.xml"
-    textfile = [textfile0, textfile1]
+    export_dir = cleanup_dir()
 
-else:
-    print("It's a monkey!")
-    sys.exit('not do')
+    file_type = unzip_file(zipped_file_name)
+
+    # we establish what kind of string is the original file
+
+    if file_type == "odt":
+        author_string = odt_string
+        textfile0 = export_dir + "content.xml"
+        textfile = [textfile0] #just to use a multifile structure, don't change
+    elif file_type == "docx":
+        author_string = doc_string
+        textfile0 = os.path.join(export_dir, 'word', '') + "document.xml"
+        textfile1 = os.path.join(export_dir, 'word', '') + "comments.xml"
+        textfile = [textfile0, textfile1]
+
+    else:
+        print("It's a monkey!")
+        sys.exit('not do')
+        cleanup_dir()
+
+    cycle_ask(textfile)
+
+    delete_initials(file_type)
+
+    anonymized = rezip(cwd, zipped_file_name)
+
+    print(f"{bcolors.OKGREEN}file is now in {anonymized}{bcolors.ENDC}\n")
+
+
     cleanup_dir()
 
-cycle_ask(textfile)
+    # TODO:
 
-delete_initials(file_type)
-
-anonymized = rezip()
-
-print(f"{bcolors.OKGREEN}file is now in {anonymized}{bcolors.ENDC}\n")
-
-
-cleanup_dir()
-
-# TODO:
-
-# Add create dir
+    # Add create dir
