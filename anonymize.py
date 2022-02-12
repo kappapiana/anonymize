@@ -61,7 +61,7 @@ doc_string_initials = "w:initials=\"(.*?)\""
 doc_string_initials_replaced = "w:initials=\"\""
 
 
-def cleanup_dir(dir="/tmp/test/"):
+def cleanup_dir(dir="/tmp/anonymize/"):
     ''' cleans the working directory, using the global variable
     no need to pass arguments '''
 
