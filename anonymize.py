@@ -32,6 +32,7 @@ import re
 import shutil
 import mimetypes
 from pathlib import Path
+import argparse
 
 # this is just optional in case we want colors
 class bcolors:
@@ -92,7 +93,7 @@ def cleanup_dir(dir="/tmp/anonymize/"):
     return dir
 
 
-def unzip_file(orig_file):
+def unzip_file(orig_file, tmp_dir):
     '''odt and docx are zip. We send them to a convenient location and work on
     that extracted stuff. Also, we check if the file type is correct, else, we
     abort, since we don't know how to handle different files'''
@@ -106,7 +107,7 @@ def unzip_file(orig_file):
     else:
         print("It's a monkey!")
 
-    shutil.unpack_archive(orig_file, export_dir, 'zip')
+    shutil.unpack_archive(orig_file, tmp_dir, 'zip')
     return filetype
 
 
@@ -235,21 +236,19 @@ def cycle_ask(cur_filename):
                     k.write(changed_text)
 
 
-def rezip(cwd, zipped_file_name):
+def rezip(output_file, tmp_dir):
     '''rewraps everything'''
 
-    anon_textfile = os.path.join(cwd, '_anon_') + zipped_file_name
-
     # Recreate a version of the file with the new content in it
-    shutil.make_archive(anon_textfile, "zip", export_dir)
+    shutil.make_archive(output_file, "zip", tmp_dir)
 
-    anon_textfile_zip = anon_textfile + ".zip"
+    output_file_zip = output_file + ".zip"
 
     # Rename it to the original extension
-    os.rename(anon_textfile_zip, anon_textfile)
+    os.rename(output_file_zip, output_file)
 
     # function returns the name of the changed file
-    return anon_textfile
+    return output_file
 
 
 def find_authors(in_text):
@@ -268,17 +267,17 @@ def find_authors(in_text):
 
     return authors_dict
 
-def delete_initials(is_type):
+def delete_initials(is_type, tmp_dir):
     '''replaces the content of the initials tag with an empty string. It doesn't
     ask for permission though, returns nothing'''
 
 
     if is_type == "docx":
-        comments_file = os.path.join(export_dir, 'word', '') + "comments.xml"
+        comments_file = os.path.join(tmp_dir, 'word', '') + "comments.xml"
         initials_replaced = doc_string_initials_replaced
         initials = doc_string_initials
     elif is_type == "odt":
-        comments_file = export_dir + "content.xml"
+        comments_file = tmp_dir + "content.xml"
         initials_replaced = odt_string_initials_replaced
         initials = odt_string_initials
 
@@ -299,25 +298,33 @@ def delete_initials(is_type):
 
 
 if __name__ == '__main__':
-    cwd = Path.cwd()  # Current directory is cwd
+    parser = argparse.ArgumentParser(description="Anonymize documents.")
+    parser.add_argument("filename", metavar="FILE", type=str,
+                        help="Path to the file to anonymize")
+    parser.add_argument("--tmp_dir", type=str, default="/tmp/anonymize",
+                        help="Temporary directory to work with")
+    parser.add_argument("--output", type=str,
+                        help="Path to output file. If not specified, will create _anon_[FILE] in the current directory.")
+    args = parser.parse_args()
 
-    # Get the first argument as the modified file
-    zipped_file_name = sys.argv[1]
+    if args.output is None:
+        cwd = Path.cwd()  # Current directory is cwd
+        args.output = os.path.join(cwd, "_anon_" + os.path.basename(args.filename))
 
-    export_dir = cleanup_dir()
+    cleanup_dir(args.tmp_dir)
 
-    file_type = unzip_file(zipped_file_name)
+    file_type = unzip_file(args.filename, args.tmp_dir)
 
     # we establish what kind of string is the original file
 
     if file_type == "odt":
         author_string = odt_string
-        textfile0 = export_dir + "content.xml"
+        textfile0 = os.path.join(args.tmp_dir, "content.xml")
         textfile = [textfile0] #just to use a multifile structure, don't change
     elif file_type == "docx":
         author_string = doc_string
-        textfile0 = os.path.join(export_dir, 'word', '') + "document.xml"
-        textfile1 = os.path.join(export_dir, 'word', '') + "comments.xml"
+        textfile0 = os.path.join(args.tmp_dir, 'word', '') + "document.xml"
+        textfile1 = os.path.join(args.tmp_dir, 'word', '') + "comments.xml"
         textfile = [textfile0, textfile1]
 
     else:
@@ -327,9 +334,9 @@ if __name__ == '__main__':
 
     cycle_ask(textfile)
 
-    delete_initials(file_type)
+    delete_initials(file_type, args.tmp_dir)
 
-    anonymized = rezip(cwd, zipped_file_name)
+    anonymized = rezip(args.output, args.tmp_dir)
 
     print(f"{bcolors.OKGREEN}file is now in {anonymized}{bcolors.ENDC}\n")
 
