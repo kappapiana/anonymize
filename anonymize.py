@@ -79,6 +79,8 @@ class File():
         self.author_string = "<dc:creator>(.*?)</dc:creator>"
         self.initials = "<meta:creator-initials>(.*?)</meta:creator-initials>"
         self.initials_replaced = "<meta:creator-initials></meta:creator-initials>"
+        self.dates = "<dc:date>(.*?)</dc:date>"
+        self.dates_replaced = "<dc:date></dc:date>"
         self.textfiles = [os.path.join(self.tmp_dir, "content.xml")]
         self.comments_index = 0 # For initials deletion
 
@@ -86,6 +88,8 @@ class File():
         self.author_string = "w:author=\"(.*?)\""
         self.initials = "w:initials=\"(.*?)\""
         self.initials_replaced = "w:initials=\"\""
+        self.dates = "w:date=\"(.*?)\""
+        self.dates_replaced = "w:date=\"\""
         self.textfiles = [os.path.join(self.tmp_dir, 'word', xml)
                           for xml in ["comments.xml", "document.xml"]]
         self.comments_index = 0 # For initials deletion
@@ -107,6 +111,14 @@ class File():
         ask for permission though, returns nothing'''
         with open(self.textfiles[self.comments_index], "r") as f:
             replaced = replace_text(f.read(), self.initials, self.initials_replaced)
+        with open(self.textfiles[self.comments_index], "w") as f:
+            f.write(replaced)
+
+    def delete_dates(self):
+        '''replaces the content of the date tag with an empty string. It doesn't
+        ask for permission though, returns nothing'''
+        with open(self.textfiles[self.comments_index], "r") as f:
+            replaced = replace_text(f.read(), self.dates, self.dates_replaced)
         with open(self.textfiles[self.comments_index], "w") as f:
             f.write(replaced)
 
@@ -281,7 +293,15 @@ def delete_initials(cur_files):
     print(f"\n{bcolors.OKCYAN}    we have deleted the initials{bcolors.ENDC}\n")
     print("++++++++++++++++++++++++++++++++++++\n")
 
+def delete_dates(cur_files):
+    '''Deletes the dates associated with comments, returns nothing'''
 
+    for cur_file in cur_files:
+        cur_file.delete_dates()
+
+    print("\n++++++++++++++++++++++++++++++++++++")
+    print(f"\n{bcolors.OKCYAN}    we have deleted the dates{bcolors.ENDC}\n")
+    print("++++++++++++++++++++++++++++++++++++\n")
 
 
 if __name__ == '__main__':
@@ -295,6 +315,8 @@ if __name__ == '__main__':
                         help="Prefix for output files.")
     parser.add_argument("--output_dir", type=str, default = Path.cwd(),
                         help="Directory for output files")
+    parser.add_argument("--dates", action='store_true',
+                        help="Delete the dates as well")
     args = parser.parse_args()
 
     # if args.output is None:
@@ -312,6 +334,9 @@ if __name__ == '__main__':
     cycle_ask(files)
 
     delete_initials(files)
+
+    if args.dates:
+        delete_dates(files)
 
     anonymized_files = rezip(files, args.output_prefix, args.output_dir)
     for anonymized in anonymized_files:
