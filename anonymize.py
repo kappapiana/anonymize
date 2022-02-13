@@ -91,6 +91,7 @@ class File():
         self.dates = "w:date=\"(.*?)\""
         self.dates_replaced = "w:date=\"\""
         self.textfiles = [os.path.join(self.tmp_dir, 'word', xml)
+                          # for xml in ["document.xml", "comments.xml"]]
                           for xml in ["comments.xml", "document.xml"]]
         self.comments_index = 0 # For initials deletion
 
@@ -102,9 +103,12 @@ class File():
                 f.write(file_contents)
 
     def find_authors(self):
+        content = []
         for textfile in self.textfiles:
             with open(textfile, 'r') as f:
-                return set(re.findall(self.author_string, f.read()))
+                content = (content + (re.findall(self.author_string, f.read())))
+        return set(content)
+
 
     def delete_initials(self):
         '''replaces the content of the initials tag with an empty string. It doesn't
