@@ -218,6 +218,7 @@ def cycle_ask(cur_files):
         # Add more commands to the list of possible authors
         additional_commands = {
             "a": "all",
+            "n": "number all",
             "q": "quit"
         }
 
@@ -256,6 +257,16 @@ def cycle_ask(cur_files):
 
             for cur_file in cur_files:
                 cur_file.replace(from_string, to_string)
+
+        elif from_string == "number all":
+            print("\nYou have selected to number all authors"
+                  "\nPlease enter the string to prepend to each number"
+                  "\nEx: 'Reviewer' => 'Reviewer' 1, 'Reviewer' 2, ... \n")
+
+            prefix = input(":> ")
+            for cur_file in cur_files:
+                for n, author in authors_list.items():
+                    cur_file.replace(author, f"{prefix} {n}")
 
         # othewise, you have selected a good key, let's replace it with
         # something and start over
