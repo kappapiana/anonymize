@@ -76,7 +76,7 @@ class File():
 
 
     def set_odt_strings(self):
-        self.author_string = "<dc:creator>(.*?)</dc:creator>"
+        self.author_string = "<dc:creator>(.*?)</dc:creator>" # TODO: change also document creator
         self.initials = "<meta:creator-initials>(.*?)</meta:creator-initials>"
         self.initials_replaced = "<meta:creator-initials></meta:creator-initials>"
         self.dates = "<dc:date>(.*?)</dc:date>"
@@ -94,6 +94,19 @@ class File():
                           # for xml in ["document.xml", "comments.xml"]]
                           for xml in ["comments.xml", "document.xml"]]
         self.comments_index = 0 # For initials deletion
+
+        # this is untested
+
+        def set_xls_strings(self):
+            self.author_string = "<dc:creator>(.*?)</dc:creator>" # FIXME: perché uguale a ODF?
+            self.initials = "w:initials=\"(.*?)\""
+            self.initials_replaced = "w:initials=\"\""
+            self.dates = "w:date=\"(.*?)\""
+            self.dates_replaced = "w:date=\"\""
+            self.textfiles = [os.path.join(self.tmp_dir, 'word', xml)
+                              # for xml in ["document.xml", "comments.xml"]]
+                              for xml in ["comments.xml", "document.xml"]]
+            self.comments_index = 0 # For initials deletion
 
     def replace(self, from_string, to_string):
         for textfile in self.textfiles:
@@ -350,5 +363,7 @@ if __name__ == '__main__':
     cleanup_dir()
 
     # TODO:
+
+    # Change also document creator
 
     # Add create dir
