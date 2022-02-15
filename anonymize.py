@@ -240,10 +240,6 @@ def cycle_ask(cur_files):
 
         # If you select quit, we are over
         elif from_string == "quit":
-            # We have finished changing the target string, write it into file.
-            print("\n++++++++++++++++++++++++++++++++++++")
-            print(f"\n{bcolors.BOLD}*** we have not changed anything{bcolors.ENDC} *** \n")
-            print("++++++++++++++++++++++++++++++++++++\n")
             break
 
         elif from_string == "all":
