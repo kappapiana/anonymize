@@ -2,6 +2,7 @@
 
 # *---------------------------------------------------------------------------
 #    SPDX-FileCopyrightText: Carlo Piana <kappa@piana.eu>
+#    SPDX-FileCopyrightText: Yaman Qalieh <ybq987@gmail.com>
 #
 #    SPDX-License-Identifier: AGPL-3.0-or-later
 # *---------------------------------------------------------------------------
@@ -290,7 +291,14 @@ def find_all_authors(cur_files):
     # assign number to each option, starting from 1
     authors_dict = {str(i+1): author
                     for i, author in enumerate(authors_list)}
+    def rezip(self, output_prefix, output_dir):
+        # Recreate a version of the file with the new content in it
 
+        output_file = os.path.join(output_dir, output_prefix + self.name)
+        output_file = os.path.join(output_dir, output_prefix + os.path.basename(self.name))
+        shutil.make_archive(output_file, "zip", self.tmp_dir)
+
+        output_file_zip = output_file + ".zip"
     return authors_dict
 
 def delete_initials(cur_files):
