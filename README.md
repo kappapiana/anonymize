@@ -87,6 +87,5 @@ from any directory and it should produce a copy with `_anon_` prepended to the f
 
 ## TODO
 
+- [ ] make it work from other directories (done for python!)
 - [ ] opt out removing initials, now it's just done at the end
-- [ ] remove also document creator, for full anonymization (now only creators)
-- [ ] make it work also for doucments without comments!
