@@ -320,19 +320,17 @@ if __name__ == '__main__':
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("filenames", metavar="FILE", type=str, nargs="+",
                         help="Path to the files to anonymize")
-    parser.add_argument("--tmp_dir", type=str, default="/tmp/anonymize",
+    parser.add_argument("--tmp-dir", type=str, default="/tmp/anonymize",
                         help="Temporary directory to work with")
-    parser.add_argument("--output_prefix", type=str, default = "_anon_",
+    parser.add_argument("--output-prefix", type=str, default = "_anon_",
                         help="Prefix for output files.")
-    parser.add_argument("--output_dir", type=str, default = Path.cwd(),
+    parser.add_argument("--output-dir", type=str, default = Path.cwd(),
                         help="Directory for output files")
-    parser.add_argument("--dates", action='store_true',
-                        help="Delete the dates as well")
+    parser.add_argument("--keep-dates", action="store_true",
+                        help="Keep the comment dates")
+    parser.add_argument("--keep-initials", action="store_true",
+                        help="Keep the commenter initials")
     args = parser.parse_args()
-
-    # if args.output is None:
-    #     cwd = Path.cwd()  # Current directory is cwd
-    #     args.output = os.path.join(cwd, "_anon_" + os.path.basename(args.filenames))
 
     # Cleanup the main tmp_dir
     cleanup_dir(args.tmp_dir)
@@ -344,9 +342,10 @@ if __name__ == '__main__':
 
     cycle_ask(files)
 
-    delete_initials(files)
+    if not args.keep_initials:
+        delete_initials(files)
 
-    if args.dates:
+    if not args.keep_dates:
         delete_dates(files)
 
     anonymized_files = rezip(files, args.output_prefix, args.output_dir)
