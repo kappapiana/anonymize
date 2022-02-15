@@ -129,7 +129,7 @@ class File():
     def rezip(self, output_prefix, output_dir):
         # Recreate a version of the file with the new content in it
 
-        output_file = os.path.join(output_dir, output_prefix + self.name)
+        output_file = os.path.join(output_dir, output_prefix + os.path.basename(self.name))
         shutil.make_archive(output_file, "zip", self.tmp_dir)
 
         output_file_zip = output_file + ".zip"
