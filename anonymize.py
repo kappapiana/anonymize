@@ -98,34 +98,55 @@ class File():
 
     def replace(self, from_string, to_string):
         for textfile in self.textfiles:
-            with open(textfile, 'r') as f:
-                file_contents = replace_text(f.read(), from_string, to_string)
-            with open(textfile, 'w') as f:
-                f.write(file_contents)
+            try:
+                open(textfile)
+            except OSError:
+                pass
+            else:
+                with open(textfile, 'r') as f:
+                    file_contents = replace_text(f.read(), from_string, to_string)
+                with open(textfile, 'w') as f:
+                    f.write(file_contents)
 
     def find_authors(self):
         content = []
         for textfile in self.textfiles:
-            with open(textfile, 'r') as f:
-                content = (content + (re.findall(self.author_string, f.read())))
+            try:
+                open(textfile)
+            except OSError:
+                pass
+            else:
+                with open(textfile, 'r') as f:
+                    content = (content + (re.findall(self.author_string, f.read())))
+
         return set(content)
 
 
     def delete_initials(self):
         '''replaces the content of the initials tag with an empty string. It doesn't
         ask for permission though, returns nothing'''
-        with open(self.textfiles[self.comments_index], "r") as f:
-            replaced = replace_text(f.read(), self.initials, self.initials_replaced)
-        with open(self.textfiles[self.comments_index], "w") as f:
-            f.write(replaced)
+        try:
+            open(self.textfiles[self.comments_index])
+        except OSError:
+            pass
+        else:
+            with open(self.textfiles[self.comments_index], "r") as f:
+                replaced = replace_text(f.read(), self.initials, self.initials_replaced)
+            with open(self.textfiles[self.comments_index], "w") as f:
+                f.write(replaced)
 
     def delete_dates(self):
         '''replaces the content of the date tag with an empty string. It doesn't
         ask for permission though, returns nothing'''
-        with open(self.textfiles[self.comments_index], "r") as f:
-            replaced = replace_text(f.read(), self.dates, self.dates_replaced)
-        with open(self.textfiles[self.comments_index], "w") as f:
-            f.write(replaced)
+        try:
+            open(self.textfiles[self.comments_index])
+        except OSError:
+            pass
+        else:
+            with open(self.textfiles[self.comments_index], "r") as f:
+                replaced = replace_text(f.read(), self.dates, self.dates_replaced)
+            with open(self.textfiles[self.comments_index], "w") as f:
+                f.write(replaced)
 
     def rezip(self, output_prefix, output_dir):
         # Recreate a version of the file with the new content in it
