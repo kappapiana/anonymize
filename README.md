@@ -63,25 +63,10 @@ sudo chown a+x ~/scripts/anonymize.sh
 
 Now you can run the script
 
-```shell    def rezip(self, output_prefix, output_dir):
-        # Recreate a version of the file with the new content in it
-
-        output_file = os.path.join(output_dir, output_prefix + self.name)
-        output_file = os.path.join(output_dir, output_prefix + os.path.basename(self.name))
-        shutil.make_archive(output_file, "zip", self.tmp_dir)
-
-        output_file_zip = output_file + ".zip"
+```shell
 cd ~/documents/
 ~/scripts/anonymize.sh doc.odt
 ```
-    def rezip(self, output_prefix, output_dir):
-        # Recreate a version of the file with the new content in it
-
-        output_file = os.path.join(output_dir, output_prefix + self.name)
-        output_file = os.path.join(output_dir, output_prefix + os.path.basename(self.name))
-        shutil.make_archive(output_file, "zip", self.tmp_dir)
-
-        output_file_zip = output_file + ".zip"
 It will interact with you asking if you want to change everything in one go or one author by one. Eventually you will (hopefully) have a file named like `_anonymized_doc.odt`. I'm not copying it over so that you can review the result without risking to destroy everything...
 
 
@@ -103,4 +88,4 @@ from any directory and it should produce a copy with `_anon_` prepended to the f
 
 
 - [ ] remove also document creator, for full anonymization (now only creators)
-- [ ] make it work also for doucments without comments!
+- [ ] make it work also for documents without comments!

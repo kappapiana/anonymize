@@ -71,9 +71,10 @@ class File():
         elif self.file_type == "docx":
             self.set_docx_strings()
         else:
-            print("It's a monkey!")
-            sys.exit('not do')
+            sys.exit(f"{bcolors.FAIL}{bcolors.BOLD}Error:{bcolors.ENDC} Missing file or file extension: {name}")
             cleanup_dir(args.tmp_dir)
+
+        self.check_textfiles()
 
 
     def set_odt_strings(self):
@@ -95,6 +96,15 @@ class File():
                           # for xml in ["document.xml", "comments.xml"]]
                           for xml in ["comments.xml", "document.xml"]]
         self.comments_index = 0 # For initials deletion
+
+    def check_textfiles(self):
+        final = []
+        for textfile in self.textfiles:
+            if os.path.isfile(textfile):
+                final.append(textfile)
+            else:
+                print(f"{bcolors.WARNING}{bcolors.BOLD}Warning:{bcolors.ENDC} Skipping expected file: {textfile}")
+        self.textfiles = final
 
     def replace(self, from_string, to_string):
         for textfile in self.textfiles:
@@ -189,7 +199,7 @@ def unzip_file(orig_file, tmp_dir):
     elif type[0] == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
         filetype = "docx"
     else:
-        print("It's a monkey!")
+        return
 
     shutil.unpack_archive(orig_file, tmp_dir, 'zip')
     return filetype
