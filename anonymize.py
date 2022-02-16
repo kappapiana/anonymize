@@ -35,6 +35,7 @@ import mimetypes
 from pathlib import Path
 import argparse
 
+
 # this is just optional in case we want colors
 class bcolors:
     HEADER = '\033[95m'
@@ -84,7 +85,7 @@ class File():
         self.dates = "<dc:date>(.*?)</dc:date>"
         self.dates_replaced = "<dc:date></dc:date>"
         self.textfiles = [os.path.join(self.tmp_dir, "content.xml")]
-        self.comments_index = 0 # For initials deletion
+        self.comments_index = 0  # For initials deletion
 
     def set_docx_strings(self):
         self.author_string = "w:author=\"(.*?)\""
@@ -95,7 +96,7 @@ class File():
         self.textfiles = [os.path.join(self.tmp_dir, 'word', xml)
                           # for xml in ["document.xml", "comments.xml"]]
                           for xml in ["comments.xml", "document.xml"]]
-        self.comments_index = 0 # For initials deletion
+        self.comments_index = 0   # For initials deletion
 
     def check_textfiles(self):
         final = []
@@ -138,7 +139,7 @@ class File():
             f.write(replaced)
 
     def rezip(self, output_prefix, output_dir):
-        # Recreate a version of the file with the new content in it
+        # Recreate a version of the file with the new content in
 
         output_file = os.path.join(output_dir, output_prefix + self.name)
         shutil.make_archive(output_file, "zip", self.tmp_dir)
@@ -213,6 +214,7 @@ def replace_text(target_string, from_string, to_string):
 
     return search_replace
 
+
 def cycle_ask(cur_files):
     '''opens and reads file to be changed, asks for input until user is fine
     then writes the changed string, until you call it quits. This is sort of the
@@ -251,7 +253,13 @@ def cycle_ask(cur_files):
             print(f"You {bcolors.BOLD}definitely{bcolors.ENDC} should use one of those keys: \n")
 
         # If you select quit, we are over
-        elif from_string == "quit":
+        elif from_string == "quit":from pathlib import Path
+import argparse
+
+
+# this is just optional in case we want colors
+class bcolors:
+    HEADER = '\033[95m'
             break
 
         elif from_string == "all":
