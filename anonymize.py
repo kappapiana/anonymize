@@ -265,13 +265,7 @@ def cycle_ask(cur_files):
             print(f"You {bcolors.BOLD}definitely{bcolors.ENDC} should use one of those keys: \n")
 
         # If you select quit, we are over
-        elif from_string == "quit":from pathlib import Path
-import argparse
-
-
-# this is just optional in case we want colors
-class bcolors:
-    HEADER = '\033[95m'
+        elif from_string == "quit":
             break
 
         elif from_string == "all":
