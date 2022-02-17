@@ -77,26 +77,34 @@ class File():
 
         self.check_textfiles()
 
+    # Document variables set in set_X_strings()
+    #
+    # regex (dict)
+    # Each regex has named groups:
+    # pre: constant text before the variable portion
+    # body: the data of the tag
+    # post: constant text after the variable position
+    # Note that the string need to be formatted before use
+    #
+    # textfiles (list)
+    # paths to relevant files within the document archive
 
     def set_odt_strings(self):
-        self.author_string = "<dc:creator>(.*?)</dc:creator>"
-        self.initials = "<meta:creator-initials>(.*?)</meta:creator-initials>"
-        self.initials_replaced = "<meta:creator-initials></meta:creator-initials>"
-        self.dates = "<dc:date>(.*?)</dc:date>"
-        self.dates_replaced = "<dc:date></dc:date>"
+        self.regex = {
+            "author": "(?P<pre><dc:creator>)(?P<body>{})(?P<post><\/dc:creator>)",
+            "initials": "(?P<pre><meta:creator-initials>)(?P<body>{})(?P<post><\/meta:creator-initials>)",
+            "dates": "(?P<pre><dc:date>)(?P<body>{})(?P<post><\/dc:date>)",
+        }
         self.textfiles = [os.path.join(self.tmp_dir, "content.xml")]
-        self.comments_index = 0  # For initials deletion
 
     def set_docx_strings(self):
-        self.author_string = "w:author=\"(.*?)\""
-        self.initials = "w:initials=\"(.*?)\""
-        self.initials_replaced = "w:initials=\"\""
-        self.dates = "w:date=\"(.*?)\""
-        self.dates_replaced = "w:date=\"\""
+        self.regex = {
+            "author": "(?P<pre>w:author=\")(?P<body>{})(?P<post>\")",
+            "initials": "(?P<pre>w:initials=\")(?P<body>{})(?P<post>\")",
+            "dates": "(?P<pre>w:date=\")(?P<body>{})(?P<post>\")",
+        }
         self.textfiles = [os.path.join(self.tmp_dir, 'word', xml)
-                          # for xml in ["document.xml", "comments.xml"]]
                           for xml in ["comments.xml", "document.xml"]]
-        self.comments_index = 0   # For initials deletion
 
     def check_textfiles(self):
         final = []
@@ -107,10 +115,26 @@ class File():
                 print(f"{bcolors.WARNING}{bcolors.BOLD}Warning:{bcolors.ENDC} Skipping expected file: {textfile}")
         self.textfiles = final
 
-    def replace(self, from_string, to_string):
+    def replace(self, from_string, to_string, regex, regex_function=False):
+        ''' Replace text in self.textfiles based on specified regex.
+
+        from_string: string or regex string to insert into main tag
+        to_string: string or lambda to replace from_string with after matching
+        regex: self.regex key to format with from_string. If None, replace from_string
+        '''
+        if regex is None:
+            regex = re.compile(from_string)
+        else:
+            regex = re.compile(self.regex[regex].format(from_string))
+            # to_string can also be a lambda function, which should implement this itself
+            if type(to_string) == str:
+                to_string = f"\\g<pre>{to_string}\\g<post>"
+
+
+
         for textfile in self.textfiles:
             with open(textfile, 'r') as f:
-                file_contents = replace_text(f.read(), from_string, to_string)
+                file_contents = regex.sub(to_string, f.read())
             with open(textfile, 'w') as f:
                 f.write(file_contents)
 
@@ -118,25 +142,22 @@ class File():
         content = []
         for textfile in self.textfiles:
             with open(textfile, 'r') as f:
-                content = (content + (re.findall(self.author_string, f.read())))
-        return set(content)
+                content = content + re.findall(self.regex["author"].format(".*?"), f.read())
+        # Only the second element in the list of tuples is the authors
+        return set([x[1] for x in content])
 
 
     def delete_initials(self):
         '''replaces the content of the initials tag with an empty string. It doesn't
         ask for permission though, returns nothing'''
-        with open(self.textfiles[self.comments_index], "r") as f:
-            replaced = replace_text(f.read(), self.initials, self.initials_replaced)
-        with open(self.textfiles[self.comments_index], "w") as f:
-            f.write(replaced)
+        self.replace(".*?", "", "initials")
 
     def delete_dates(self):
         '''replaces the content of the date tag with an empty string. It doesn't
         ask for permission though, returns nothing'''
-        with open(self.textfiles[self.comments_index], "r") as f:
-            replaced = replace_text(f.read(), self.dates, self.dates_replaced)
-        with open(self.textfiles[self.comments_index], "w") as f:
-            f.write(replaced)
+        # Replace with the datetime for 0
+        # See https://www.w3.org/TR/2004/REC-xmlschema-2-20041028/#dateTime
+        self.replace(".*?", "0001-01-01T00:00:00", "dates")
 
     def rezip(self, output_prefix, output_dir):
         # Recreate a version of the file with the new content in
@@ -206,15 +227,6 @@ def unzip_file(orig_file, tmp_dir):
     return filetype
 
 
-def replace_text(target_string, from_string, to_string):
-    ''' gets input string to replace ad substitutes it with the corresponding
-    string in target file, very simple and straightforward'''
-
-    search_replace = re.sub(from_string, to_string, target_string)
-
-    return search_replace
-
-
 def cycle_ask(cur_files):
     '''opens and reads file to be changed, asks for input until user is fine
     then writes the changed string, until you call it quits. This is sort of the
@@ -253,13 +265,7 @@ def cycle_ask(cur_files):
             print(f"You {bcolors.BOLD}definitely{bcolors.ENDC} should use one of those keys: \n")
 
         # If you select quit, we are over
-        elif from_string == "quit":from pathlib import Path
-import argparse
-
-
-# this is just optional in case we want colors
-class bcolors:
-    HEADER = '\033[95m'
+        elif from_string == "quit":
             break
 
         elif from_string == "all":
@@ -267,11 +273,11 @@ class bcolors:
                   "\nPlease enter the string you want to change"
                   f" {bcolors.BOLD}to{bcolors.ENDC} \n")
 
-            from_string = "|".join(authors_list.values())
+            from_string = "|".join([re.escape(a) for a in authors_list.values()])
             to_string = input(":> ")
 
             for cur_file in cur_files:
-                cur_file.replace(from_string, to_string)
+                cur_file.replace(from_string, to_string, "author")
 
         elif from_string == "number all":
             print("\nYou have selected to number all authors"
@@ -279,9 +285,17 @@ class bcolors:
                   "\nEx: 'Reviewer' => 'Reviewer' 1, 'Reviewer' 2, ... \n")
 
             prefix = input(":> ")
+
+            from_string = "|".join(authors_list.values())
+
+            # Create a repl function to pass to re.sub
+            reversed_authors = {author: num for num, author in authors_list.items()}
+            to_string = lambda x: f"{x.group('pre')}{prefix} {reversed_authors.get(x.group('body'), x.group('body'))}{x.group('post')}"
+
             for cur_file in cur_files:
-                for n, author in authors_list.items():
-                    cur_file.replace(author, f"{prefix} {n}")
+                cur_file.replace(from_string, to_string, "author")
+                # for n, author in authors_list.items():
+                #     cur_file.replace(re.escape(author), f"{prefix} {n}")
 
         # othewise, you have selected a good key, let's replace it with
         # something and start over
@@ -290,7 +304,7 @@ class bcolors:
             to_string = input(f"\nPlease enter the string you want to change {bcolors.BOLD}to{bcolors.ENDC} \n\n:> ")
 
             for cur_file in cur_files:
-                cur_file.replace(from_string, to_string)
+                cur_file.replace(re.escape(from_string), to_string, "author")
 
 
 def rezip(cur_files, output_prefix, output_dir):
