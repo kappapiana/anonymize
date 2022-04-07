@@ -104,7 +104,7 @@ class File():
             "dates": "(?P<pre>w:date=\")(?P<body>{})(?P<post>\")",
         }
         self.textfiles = [os.path.join(self.tmp_dir, 'word', xml)
-                          for xml in ["comments.xml", "document.xml"]]
+                          for xml in ["comments.xml", "document.xml", "footnotes.xml"]]
 
     def check_textfiles(self):
         final = []
