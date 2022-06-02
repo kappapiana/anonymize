@@ -253,7 +253,10 @@ def cycle_ask(cur_files):
 
         # Present the selection menu
         print(f"\nSelect values that you want to change from this "
-              f"list, or {bcolors.OKCYAN}a{bcolors.ENDC} for all, \nor {bcolors.OKCYAN}q{bcolors.ENDC} to quit:\n")
+              f"list, \n- or {bcolors.OKCYAN}a{bcolors.ENDC} for replacing all "
+              f"names with one, \n"
+              f"- or {bcolors.OKCYAN}n{bcolors.ENDC} to change all user with"
+              f" num+<prefix> \n- or {bcolors.OKCYAN}q{bcolors.ENDC} to quit:\n")
         for key in commands:
             print(f"{key}: {commands.get(key)}")
 
