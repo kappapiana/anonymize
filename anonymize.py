@@ -22,10 +22,6 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 # *---------------------------------------------------------------------------
-#    This is script is a refactored version of the bash script
-#    It should be more consistent and reliable, but mainly it'a an exercise
-#    to learn a bit of python.
-# *---------------------------------------------------------------------------
 
 import os
 import sys
@@ -35,9 +31,11 @@ import mimetypes
 from pathlib import Path
 import argparse
 
-
-# this is just optional in case we want colors
 class bcolors:
+    '''
+    Colors to improve the interface a bit
+    '''
+
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
     OKCYAN = '\033[96m'
@@ -65,7 +63,8 @@ class File():
         self.tmp_dir = cleanup_dir(tmp_dir)
 
         if not os.path.exists(self.name):
-            sys.exit(f"{bcolors.FAIL}{bcolors.BOLD}Error:{bcolors.ENDC} Cannot find file \"{self.name}\"")
+            sys.exit(f"{bcolors.FAIL}{bcolors.BOLD}Error:{bcolors.ENDC} Cannot"
+                     f" find file \"{self.name}\"")
 
         self.file_type = unzip_file(name, tmp_dir)
 
@@ -75,7 +74,9 @@ class File():
         elif self.file_type == "docx":
             self.set_docx_strings()
         else:
-            sys.exit(f"{bcolors.FAIL}{bcolors.BOLD}Error:{bcolors.ENDC} {self.file_type} is not a supported file type (from \"{self.name}\")")
+            sys.exit(f"{bcolors.FAIL}{bcolors.BOLD}Error:{bcolors.ENDC} "
+                     f"{self.file_type} is not a supported file type (from "
+                     f"\"{self.name}\")")
             cleanup_dir(args.tmp_dir)
 
         self.check_textfiles()
@@ -133,8 +134,6 @@ class File():
             if type(to_string) == str:
                 to_string = f"\\g<pre>{to_string}\\g<post>"
 
-
-
         for textfile in self.textfiles:
             with open(textfile, 'r') as f:
                 file_contents = regex.sub(to_string, f.read())
@@ -149,10 +148,9 @@ class File():
         # Only the second element in the list of tuples is the authors
         return set([x[1] for x in content])
 
-
     def delete_initials(self):
-        '''replaces the content of the initials tag with an empty string. It doesn't
-        ask for permission though, returns nothing'''
+        '''replaces the content of the initials tag with an empty string.
+        It doesn't ask for permission though, returns nothing'''
         self.replace(".*?", "", "initials")
 
     def delete_dates(self):
@@ -232,10 +230,11 @@ def unzip_file(orig_file, tmp_dir):
 
 def cycle_ask(cur_files):
     '''opens and reads file to be changed, asks for input until user is fine
-    then writes the changed string, until you call it quits. This is sort of the
-    main function here'''
+    then writes the changed string, until you call it quits. This is sort of
+    the main function here'''
 
     # Flatten list of lists structure
+    # FIXME filelist variable declared but not used. Missing anything?
     filelist = [item for subfile in cur_files for item in subfile.textfiles]
 
     while True:
@@ -249,8 +248,6 @@ def cycle_ask(cur_files):
             "n": "number all",
             "q": "quit"
         }
-
-        # FIXME: we read the values, but we still can't work out writing the file
 
         commands = {**authors_list, **additional_commands}
 
