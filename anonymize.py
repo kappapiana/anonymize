@@ -72,7 +72,7 @@ class File():
         elif self.file_type == "docx":
             self.set_docx_strings()
         else:
-            sys.exit(f"{bcolors.FAIL}{bcolors.BOLD}Error:{bcolors.ENDC} {name} is not a supported file type: we found \"{self.file_type}\"")
+            sys.exit(f"{bcolors.FAIL}{bcolors.BOLD}Error:{bcolors.ENDC} {self.file_type} is not a supported file type (from \"{self.name}\")")
             cleanup_dir(args.tmp_dir)
 
         self.check_textfiles()
