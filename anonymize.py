@@ -369,7 +369,7 @@ if __name__ == '__main__':
     parser.add_argument("--remove-dates", action="store_true",
                         help="Remove also the dates form tracked edits")
     parser.add_argument("--keep-initials", action="store_true",
-                        help="Keep the author's initials")
+                        help="Keep the comment authors' initials")
     args = parser.parse_args()
 
     # Cleanup the main tmp_dir
