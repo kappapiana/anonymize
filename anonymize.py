@@ -366,8 +366,8 @@ if __name__ == '__main__':
                         help="Prefix for output files.")
     parser.add_argument("--output-dir", type=str, default = Path.cwd(),
                         help="Directory for output files")
-    parser.add_argument("--keep-dates", action="store_true",
-                        help="Keep the comment dates")
+    parser.add_argument("--remove-dates", action="store_true",
+                        help="Removes also the comment dates")
     parser.add_argument("--keep-initials", action="store_true",
                         help="Keep the commenter initials")
     args = parser.parse_args()
@@ -385,7 +385,7 @@ if __name__ == '__main__':
     if not args.keep_initials:
         delete_initials(files)
 
-    if not args.keep_dates:
+    if args.remove_dates:
         delete_dates(files)
 
     anonymized_files = rezip(files, args.output_prefix, args.output_dir)
