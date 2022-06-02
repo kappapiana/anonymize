@@ -367,9 +367,9 @@ if __name__ == '__main__':
     parser.add_argument("--output-dir", type=str, default = Path.cwd(),
                         help="Directory for output files")
     parser.add_argument("--remove-dates", action="store_true",
-                        help="Removes also the comment dates")
+                        help="Remove also the dates form tracked edits")
     parser.add_argument("--keep-initials", action="store_true",
-                        help="Keep the commenter initials")
+                        help="Keep the author's initials")
     args = parser.parse_args()
 
     # Cleanup the main tmp_dir
