@@ -64,6 +64,9 @@ class File():
         self.name = name
         self.tmp_dir = cleanup_dir(tmp_dir)
 
+        if not os.path.exists(self.name):
+            sys.exit(f"{bcolors.FAIL}{bcolors.BOLD}Error:{bcolors.ENDC} Cannot find file \"{self.name}\"")
+
         self.file_type = unzip_file(name, tmp_dir)
 
         # we establish what kind of string is the original file
