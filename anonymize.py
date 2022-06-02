@@ -64,6 +64,9 @@ class File():
         self.name = name
         self.tmp_dir = cleanup_dir(tmp_dir)
 
+        if not os.path.exists(self.name):
+            sys.exit(f"{bcolors.FAIL}{bcolors.BOLD}Error:{bcolors.ENDC} Cannot find file \"{self.name}\"")
+
         self.file_type = unzip_file(name, tmp_dir)
 
         # we establish what kind of string is the original file
@@ -72,7 +75,7 @@ class File():
         elif self.file_type == "docx":
             self.set_docx_strings()
         else:
-            sys.exit(f"{bcolors.FAIL}{bcolors.BOLD}Error:{bcolors.ENDC} Missing file or file extension: {name}")
+            sys.exit(f"{bcolors.FAIL}{bcolors.BOLD}Error:{bcolors.ENDC} {self.file_type} is not a supported file type (from \"{self.name}\")")
             cleanup_dir(args.tmp_dir)
 
         self.check_textfiles()
@@ -221,7 +224,7 @@ def unzip_file(orig_file, tmp_dir):
     elif type[0] == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
         filetype = "docx"
     else:
-        return
+        return type[0]
 
     shutil.unpack_archive(orig_file, tmp_dir, 'zip')
     return filetype
