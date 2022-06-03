@@ -321,11 +321,12 @@ def find_all_authors(cur_files):
 
     authors = [f.find_authors() for f in cur_files]
     authors_list = sorted(set().union(*authors),
-                          key = lambda s: s.lower())  # sort in lowercase
+                          key=lambda s: s.lower())  # sort in lowercase
 
     # assign number to each option, starting from 1
     authors_dict = {str(i+1): author
                     for i, author in enumerate(authors_list)}
+
     def rezip(self, output_prefix, output_dir):
         # Recreate a version of the file with the new content in it
 
@@ -336,6 +337,7 @@ def find_all_authors(cur_files):
         output_file_zip = output_file + ".zip"
     return authors_dict
 
+
 def delete_initials(cur_files):
     '''replaces the content of the initials tag with an empty string. It doesn't
     ask for permission though, returns nothing'''
@@ -344,8 +346,9 @@ def delete_initials(cur_files):
         cur_file.delete_initials()
 
     print("\n++++++++++++++++++++++++++++++++++++")
-    print(f"\n{bcolors.OKCYAN}    we have deleted the initials{bcolors.ENDC}\n")
+    print(f"\n{bcolors.OKCYAN}   we have deleted the initials{bcolors.ENDC}\n")
     print("++++++++++++++++++++++++++++++++++++\n")
+
 
 def delete_dates(cur_files):
     '''Deletes the dates associated with comments, returns nothing'''
@@ -354,7 +357,7 @@ def delete_dates(cur_files):
         cur_file.delete_dates()
 
     print("\n++++++++++++++++++++++++++++++++++++")
-    print(f"\n{bcolors.OKCYAN}    we have deleted the dates{bcolors.ENDC}\n")
+    print(f"\n{bcolors.OKCYAN}   we have deleted the dates{bcolors.ENDC}\n")
     print("++++++++++++++++++++++++++++++++++++\n")
 
 
@@ -365,9 +368,9 @@ if __name__ == '__main__':
                         help="Path to the files to anonymize")
     parser.add_argument("--tmp-dir", type=str, default="/tmp/anonymize",
                         help="Temporary directory to work with")
-    parser.add_argument("--output-prefix", type=str, default = "_anon_",
+    parser.add_argument("--output-prefix", type=str, default="_anon_",
                         help="Prefix for output files.")
-    parser.add_argument("--output-dir", type=str, default = Path.cwd(),
+    parser.add_argument("--output-dir", type=str, default=Path.cwd(),
                         help="Directory for output files")
     parser.add_argument("--remove-dates", action="store_true",
                         help="Remove dates from tracked edits")
@@ -395,9 +398,4 @@ if __name__ == '__main__':
     for anonymized in anonymized_files:
         print(f"{bcolors.OKGREEN}file is now in {anonymized}{bcolors.ENDC}\n")
 
-
     cleanup_dir()
-
-    # TODO:
-
-    # Add create dir
