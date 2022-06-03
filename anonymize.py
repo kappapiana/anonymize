@@ -252,11 +252,13 @@ def cycle_ask(cur_files):
         commands = {**authors_list, **additional_commands}
 
         # Present the selection menu
-        print(f"\nSelect values that you want to change from this "
-              f"list, \n- or {bcolors.OKCYAN}a{bcolors.ENDC} for replacing all "
-              f"names with one, \n"
-              f"- or {bcolors.OKCYAN}n{bcolors.ENDC} to change all user with"
-              f" num+<prefix> \n- or {bcolors.OKCYAN}q{bcolors.ENDC} to quit:\n")
+        print(f"\nSelect the values that you want to change from this list, by"
+              f" entering:"
+              f"\n- the {bcolors.OKCYAN}corresponding number{bcolors.ENDC};"
+              f"\n- or {bcolors.OKCYAN}a{bcolors.ENDC} for replacing all names"
+              f" with one;\n- or {bcolors.OKCYAN}n{bcolors.ENDC} to change all"
+              f"user with num+<prefix>; \n- or {bcolors.OKCYAN}q{bcolors.ENDC}"
+              f" to quit:\n")
         for key in commands:
             print(f"{key}: {commands.get(key)}")
 
