@@ -8,20 +8,22 @@
 
 [![REUSE status](https://api.reuse.software/badge/github.com/kappapiana/anonymize)](https://api.reuse.software/info/github.com/kappapiana/anonymize)
 
+Skip to [howto python](#howto-python)
+
 # ODF and DOCX anonymizer
 
-This script `anonymize.py` does one thing and hopefully it does it well. It allows changing the metadata to comment and track changes and hopefully also other metadata to a document.
+`anonymize.py` does one thing and hopefully does it well. It allows changing the metadata to comment and track changes and hopefully other metadata in a document.
 
-For those better used to `bash` script or not fancy with installing python, `anonymize.sh` is an old and not actively developed (probably broken) verision.
+For those better used to `bash` scripts or cannot install python, `anonymize.sh` is an old and not actively developed (probably broken) version. Use at your own risk (just like the rest, anyway ;-)
 
 ## Rationale
 
-The idea came from working as an editor of a peer-reviewed journal (see https://jolts.world).
+The idea came from working as an editor of a peer-reviewed journal (see https://jolts.world), where I needed to remove names of peer-reviewers.
 
 Reviews are half-blind and are done in ODT via Libreoffice, as a preference. However,
-the best way to provide feeback -- redlines and comment -- give away the author's name, thus the reviewer's. It is possible to change the settings in Libreoffice, but out of experience very few care (even if properly instructed). Or they realize it halfway through.
+the best way to provide feedback -- redlines and comment -- expose the reviewer's name. It is possible to change the settings in Libreoffice, but out of experience very few care (even if properly instructed). Or they realize it halfway through, when it's too late. Full anonymization as Word does (very convoluted) is also unsatisfactory, as you want to retain which of the reviewers suggested a change, maybe for further iterations.
 
-Therefore I needed something to sanitize the data.
+Therefore I needed something to sanitize the data, by changing the names to something like "Reviewer 1" or to consolidate them into a single name.
 
 ## Second thought
 
@@ -33,59 +35,45 @@ This is the second option.
 
 ## Third thought, docx
 
-But I also needed that the many time (most of the time) when I have to clean up the mess of multiple internal edits with clients working in docx. Therefore I have added the same structure (also OOXML is an XML bunch of files zipped together) for that file, without the need to convert them in ODT as I used to do before.
+I also needed something to clean up the mess of multiple internal edits with many (most) clients who work in docx. Therefore I have added the same functions (also OOXML is a bunch of XML, files zipped together, just a bit more clumsy) for that file type, without the need to convert them in ODT as I used to do before (round robin tends to screw up).
 
-So it will also work with docx (OOXML text document), although MS Word® has a feature to change data as an afterthought (but all or none, AFAICR) and this script might not be strictly necessary.
+So it will also work with docx (OOXML text document), although MS Word® has a feature to change data as an afterthought (but all or none, AFAICT) so this script might not be strictly necessary (I think it is).
 
 ## Fourth thought, python3
 
-I have attempted a porting to python3, actually everything has been rewritten with some more sense. It should work for any operating system, as I have abstracted the paths via the `os` library. Hopefully.
-
-# HOWTO BASH
-
-Requires a recently updated version of Linux (I target bash 4.0, roughly), preferably git (but it's not necessary) and a working knowledge of running scripts. The easiest way is to clone the repository somewhere and point to the script from the command line.
-
-This is still work in progress, but it's now reasonably good to go.
-
-Suppose that you have installed (copied) it in `~/scripts/anonymize.sh` and that your documenti is in `~/documents/doc.odt`
-
-Do this:
-
-```shell
-ls -l ~/scripts/anonymize.sh # (make sure it's "executable")
-```
-
-if it is not executable
-
-```shell
-sudo chown a+x ~/scripts/anonymize.sh
-```
-
-Now you can run the script
-
-```shell
-cd ~/documents/
-~/scripts/anonymize.sh doc.odt
-```
-It will interact with you asking if you want to change everything in one go or one author by one. Eventually you will (hopefully) have a file named like `_anonymized_doc.odt`. I'm not copying it over so that you can review the result without risking to destroy everything...
+Since scripting is limited, I decided to port everything to python3, actually everything has been rewritten with some more sense. It should work for any operating system, as I have abstracted the paths via the `os` library. Hopefully. See [Windows and Mac](#windows-and-mac) for more instructions.
 
 
 # HOWTO python
 
-It should be sufficient to have a running python3 environment, the imported libraries are all from the standard set.
+It should be sufficient to have a running python3 environment. The imported libraries are all from the standard set.
 
-just run
+Run
 
-```
+```shell
 [script_directory]/anonymize.py filename.[odt|docx]
-
 ```
 
-from any directory and it should produce a copy with `_anon_` prepended to the filename
+from any directory and it should produce a copy with `_anon_` prepended to the filename.
 
+Use
+
+```shell
+[script_directory]/anonymize.py --help
+```
+
+to see other arguments that can be passed to the program.
+
+## Windows and Mac
+
+Keep in mind, this script is tested only in Linux. If you are using from another OS, you should declare the temporary directory (default: `/tmp/anonymize`) like this:
+
+```shell
+anonymize.py --tmp-dir [temporary directory of choice] FILE
+```
+
+using the directory convention of your OS.
 
 ## TODO
 
-
-- [ ] remove also document creator, for full anonymization (now only creators)
-- [ ] make it work also for documents without comments!
+- [ ] remove also document creator, for full anonymization (now only redline and comments creators)
