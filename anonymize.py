@@ -46,6 +46,17 @@ class bcolors:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
 
+    def remove_color():
+        bcolors.HEADER = ''
+        bcolors.OKBLUE = ''
+        bcolors.OKCYAN = ''
+        bcolors.OKGREEN = ''
+        bcolors.WARNING = ''
+        bcolors.FAIL = ''
+        bcolors.ENDC = ''
+        bcolors.BOLD = ''
+        bcolors.UNDERLINE = ''
+
 
 class File():
     '''Stores information relevant to each file that is being anonymized.
@@ -374,7 +385,12 @@ if __name__ == '__main__':
                         help="Remove dates from tracked edits")
     parser.add_argument("--keep-initials", action="store_true",
                         help="Keep the comment authors' initials")
+    parser.add_argument("--no-color", action="store_true",
+                        help="Remove color from the prompts. You can also use NO_COLOR")
     args = parser.parse_args()
+
+    if args.no_color or os.getenv("NO_COLOR") is not None:
+        bcolors.remove_color()
 
     # Cleanup the main tmp_dir
     cleanup_dir(args.tmp_dir)
