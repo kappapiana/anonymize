@@ -233,10 +233,6 @@ def cycle_ask(cur_files):
     then writes the changed string, until you call it quits. This is sort of
     the main function here'''
 
-    # Flatten list of lists structure
-    # FIXME filelist variable declared but not used. Missing anything?
-    filelist = [item for subfile in cur_files for item in subfile.textfiles]
-
     while True:
 
         # here we find the authors
@@ -256,8 +252,8 @@ def cycle_ask(cur_files):
               f" entering:"
               f"\n- the {bcolors.OKCYAN}corresponding number{bcolors.ENDC};"
               f"\n- or {bcolors.OKCYAN}a{bcolors.ENDC} for replacing all names"
-              f" with one;\n- or {bcolors.OKCYAN}n{bcolors.ENDC} to change all"
-              f"user with num+<prefix>; \n- or {bcolors.OKCYAN}q{bcolors.ENDC}"
+              f" with one;\n- or {bcolors.OKCYAN}n{bcolors.ENDC} to change each"
+              f" user with <prefix>+num; \n- or {bcolors.OKCYAN}q{bcolors.ENDC}"
               f" to quit:\n")
         for key in commands:
             print(f"{key}: {commands.get(key)}")
