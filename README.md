@@ -8,7 +8,7 @@
 
 [![REUSE status](https://api.reuse.software/badge/github.com/kappapiana/anonymize)](https://api.reuse.software/info/github.com/kappapiana/anonymize)
 
-Skip to [howto python]
+Skip to [howto python](#howto-python)
 
 # ODF and DOCX anonymizer
 
