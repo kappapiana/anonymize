@@ -28,6 +28,7 @@ import sys
 import re
 import shutil
 import mimetypes
+import tempfile
 from pathlib import Path
 import argparse
 
@@ -67,17 +68,17 @@ class File():
     tmp_dir: location of unzipped file
     '''
 
-    def __init__(self, name, tmp_dir):
+    def __init__(self, name):
         '''Initializes name, tmp_dir, and file_type and
         unzips original file into temporary directory'''
         self.name = name
-        self.tmp_dir = cleanup_dir(tmp_dir)
+        self.tmp_dir = tempfile.mkdtemp()
 
         if not os.path.exists(self.name):
             sys.exit(f"{bcolors.FAIL}{bcolors.BOLD}Error:{bcolors.ENDC} Cannot"
                      f" find file \"{self.name}\"")
 
-        self.file_type = unzip_file(name, tmp_dir)
+        self.file_type = unzip_file(name, self.tmp_dir)
 
         # we establish what kind of string is the original file
         if self.file_type == "odt":
@@ -88,9 +89,12 @@ class File():
             sys.exit(f"{bcolors.FAIL}{bcolors.BOLD}Error:{bcolors.ENDC} "
                      f"{self.file_type} is not a supported file type (from "
                      f"\"{self.name}\")")
-            cleanup_dir(args.tmp_dir)
 
         self.check_textfiles()
+
+    def __del__(self):
+        # Cleanup temporary directory
+        shutil.rmtree(self.tmp_dir)
 
     # Document variables set in set_X_strings()
     #
@@ -180,46 +184,10 @@ class File():
         output_file_zip = output_file + ".zip"
 
         # Rename it to the original extension
-        os.rename(output_file_zip, output_file)
+        os.replace(output_file_zip, output_file)
 
         # function returns the name of the changed file
         return output_file
-
-
-def cleanup_dir(dir="/tmp/anonymize/"):
-    ''' cleans the working directory '''
-
-    if os.path.isdir(dir) is True:
-
-        for files in os.listdir(dir):
-            path = os.path.join(dir, files)
-            try:
-                shutil.rmtree(path)
-            except OSError:
-                os.remove(path)
-    else:
-        try:
-            os.mkdir(dir)
-        except OSError:
-            print("\nCreation of the directory %s failed" % dir)
-
-            # Creates dir with trailing slash even if not in input
-            # oftentimes people don't add
-            dir = os.path.join(input("insert alternative temporary directory \n:> "), '')
-
-            if os.path.isdir(dir) is True:  # if dir exists already, use it
-                pass
-            elif os.path.isfile(dir) is True:  # it's a file, cant use this
-                print(f"sorry {dir} is an existing file can't create dir")
-                print("make sure to find another directory where you "
-                      "have permissions")
-                sys.exit('...quitting.')
-            else:
-                os.mkdir(dir)
-        else:
-            print("\nSuccessfully created the directory %s " % dir)
-
-    return dir
 
 
 def unzip_file(orig_file, tmp_dir):
@@ -375,8 +343,6 @@ if __name__ == '__main__':
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("filenames", metavar="FILE", type=str, nargs="+",
                         help="Path to the files to anonymize")
-    parser.add_argument("--tmp-dir", type=str, default="/tmp/anonymize",
-                        help="Temporary directory to work with")
     parser.add_argument("--output-prefix", type=str, default="_anon_",
                         help="Prefix for output files.")
     parser.add_argument("--output-dir", type=str, default=Path.cwd(),
@@ -392,13 +358,8 @@ if __name__ == '__main__':
     if args.no_color or os.getenv("NO_COLOR") is not None:
         bcolors.remove_color()
 
-    # Cleanup the main tmp_dir
-    cleanup_dir(args.tmp_dir)
-
-    # Make a tmp directory for each file and unzip the file there
     # Creates a list of File
-    files = [File(filename, os.path.join(args.tmp_dir, str(i)))
-             for i, filename in enumerate(args.filenames)]
+    files = [File(filename) for i, filename in enumerate(args.filenames)]
 
     cycle_ask(files)
 
@@ -411,5 +372,3 @@ if __name__ == '__main__':
     anonymized_files = rezip(files, args.output_prefix, args.output_dir)
     for anonymized in anonymized_files:
         print(f"{bcolors.OKGREEN}file is now in {anonymized}{bcolors.ENDC}\n")
-
-    cleanup_dir()
