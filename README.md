@@ -64,15 +64,6 @@ Use
 
 to see other arguments that can be passed to the program.
 
-## Windows and Mac
-
-Keep in mind, this script is tested only in Linux. If you are using from another OS, you should declare the temporary directory (default: `/tmp/anonymize`) like this:
-
-```shell
-anonymize.py --tmp-dir [temporary directory of choice] FILE
-```
-
-using the directory convention of your OS.
 
 ## TODO
 
