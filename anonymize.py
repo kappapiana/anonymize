@@ -76,6 +76,7 @@ class File():
         self.tmp_dir = tempfile.mkdtemp()
 
         if not os.path.exists(self.name):
+            shutil.rmtree(self.tmp_dir, ignore_errors=True)
             sys.exit(f"{bcolors.FAIL}{bcolors.BOLD}Error:{bcolors.ENDC} Cannot"
                      f" find file \"{self.name}\"")
 
@@ -95,8 +96,8 @@ class File():
         self.check_textfiles()
 
     def __del__(self):
-        # Cleanup temporary directory
-        shutil.rmtree(self.tmp_dir)
+        # Cleanup temporary directory (ignore_errors in case already removed or interpreter shutting down)
+        shutil.rmtree(self.tmp_dir, ignore_errors=True)
 
     # Document variables set in set_X_strings()
     #
