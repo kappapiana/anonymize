@@ -23,13 +23,14 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 # *---------------------------------------------------------------------------
 
+import argparse
+import atexit
 import os
-import sys
 import re
 import shutil
+import sys
 import mimetypes
 from pathlib import Path
-import argparse
 
 class bcolors:
     '''
@@ -46,6 +47,7 @@ class bcolors:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
 
+    @staticmethod
     def remove_color():
         bcolors.HEADER = ''
         bcolors.OKBLUE = ''
@@ -67,11 +69,12 @@ class File():
     tmp_dir: location of unzipped file
     '''
 
-    def __init__(self, name, tmp_dir):
+    def __init__(self, name, tmp_dir, parent_tmp_dir):
         '''Initializes name, tmp_dir, and file_type and
         unzips original file into temporary directory'''
         self.name = name
         self.tmp_dir = cleanup_dir(tmp_dir)
+        self.parent_tmp_dir = parent_tmp_dir
 
         if not os.path.exists(self.name):
             sys.exit(f"{bcolors.FAIL}{bcolors.BOLD}Error:{bcolors.ENDC} Cannot"
@@ -85,10 +88,10 @@ class File():
         elif self.file_type == "docx":
             self.set_docx_strings()
         else:
+            cleanup_dir(parent_tmp_dir)
             sys.exit(f"{bcolors.FAIL}{bcolors.BOLD}Error:{bcolors.ENDC} "
                      f"{self.file_type} is not a supported file type (from "
                      f"\"{self.name}\")")
-            cleanup_dir(args.tmp_dir)
 
         self.check_textfiles()
 
@@ -106,17 +109,17 @@ class File():
 
     def set_odt_strings(self):
         self.regex = {
-            "author": "(?P<pre><dc:creator>)(?P<body>{})(?P<post><\/dc:creator>)",
-            "initials": "(?P<pre><meta:creator-initials>)(?P<body>{})(?P<post><\/meta:creator-initials>)",
-            "dates": "(?P<pre><dc:date>)(?P<body>{})(?P<post><\/dc:date>)",
+            "author": r"(?P<pre><dc:creator>)(?P<body>{})(?P<post></dc:creator>)",
+            "initials": r"(?P<pre><meta:creator-initials>)(?P<body>{})(?P<post></meta:creator-initials>)",
+            "dates": r"(?P<pre><dc:date>)(?P<body>{})(?P<post></dc:date>)",
         }
         self.textfiles = [os.path.join(self.tmp_dir, "content.xml")]
 
     def set_docx_strings(self):
         self.regex = {
-            "author": "(?P<pre>w:author=\")(?P<body>{})(?P<post>\")",
-            "initials": "(?P<pre>w:initials=\")(?P<body>{})(?P<post>\")",
-            "dates": "(?P<pre>w:date=\")(?P<body>{})(?P<post>\")",
+            "author": r'(?P<pre>w:author=")(?P<body>{})(?P<post>")',
+            "initials": r'(?P<pre>w:initials=")(?P<body>{})(?P<post>")',
+            "dates": r'(?P<pre>w:date=")(?P<body>{})(?P<post>")',
         }
         self.textfiles = [os.path.join(self.tmp_dir, 'word', xml)
                           for xml in ["comments.xml", "document.xml", "footnotes.xml"]]
@@ -130,31 +133,31 @@ class File():
                 print(f"{bcolors.WARNING}{bcolors.BOLD}Warning:{bcolors.ENDC} Skipping expected file: {textfile}")
         self.textfiles = final
 
-    def replace(self, from_string, to_string, regex, regex_function=False):
+    def replace(self, from_string, to_string, regex):
         ''' Replace text in self.textfiles based on specified regex.
 
         from_string: string or regex string to insert into main tag
-        to_string: string or lambda to replace from_string with after matching
+        to_string: string or callable (e.g. lambda) to replace from_string with after matching
         regex: self.regex key to format with from_string. If None, replace from_string
         '''
         if regex is None:
             regex = re.compile(from_string)
         else:
             regex = re.compile(self.regex[regex].format(from_string))
-            # to_string can also be a lambda function, which should implement this itself
-            if type(to_string) == str:
+            # to_string can also be a callable (e.g. lambda), which receives the match
+            if isinstance(to_string, str):
                 to_string = f"\\g<pre>{to_string}\\g<post>"
 
         for textfile in self.textfiles:
-            with open(textfile, 'r') as f:
+            with open(textfile, 'r', encoding='utf-8') as f:
                 file_contents = regex.sub(to_string, f.read())
-            with open(textfile, 'w') as f:
+            with open(textfile, 'w', encoding='utf-8') as f:
                 f.write(file_contents)
 
     def find_authors(self):
         content = []
         for textfile in self.textfiles:
-            with open(textfile, 'r') as f:
+            with open(textfile, 'r', encoding='utf-8') as f:
                 content = content + re.findall(self.regex["author"].format(".*?"), f.read())
         # Only the second element in the list of tuples is the authors
         return set([x[1] for x in content])
@@ -172,9 +175,9 @@ class File():
         self.replace(".*?", "0001-01-01T00:00:00", "dates")
 
     def rezip(self, output_prefix, output_dir):
-        # Recreate a version of the file with the new content in
-
-        output_file = os.path.join(output_dir, output_prefix + self.name)
+        # Recreate a version of the file with the new content in.
+        # Output uses basename so all files go under output_dir (no input path preserved).
+        output_file = os.path.join(output_dir, output_prefix + os.path.basename(self.name))
         shutil.make_archive(output_file, "zip", self.tmp_dir)
 
         output_file_zip = output_file + ".zip"
@@ -186,40 +189,28 @@ class File():
         return output_file
 
 
-def cleanup_dir(dir="/tmp/anonymize/"):
-    ''' cleans the working directory '''
+def cleanup_dir(dir_path="/tmp/anonymize"):
+    '''Cleans the working directory, or creates it if missing.
+    Use --tmp-dir if the default is not writable (e.g. on Windows).'''
+    dir_path = Path(dir_path)
 
-    if os.path.isdir(dir) is True:
-
-        for files in os.listdir(dir):
-            path = os.path.join(dir, files)
+    if dir_path.is_dir():
+        for entry in dir_path.iterdir():
             try:
-                shutil.rmtree(path)
+                shutil.rmtree(entry)
             except OSError:
-                os.remove(path)
+                entry.unlink()
     else:
         try:
-            os.mkdir(dir)
+            dir_path.mkdir(parents=True, exist_ok=True)
         except OSError:
-            print("\nCreation of the directory %s failed" % dir)
+            sys.exit(
+                f"{bcolors.FAIL}{bcolors.BOLD}Error:{bcolors.ENDC} "
+                f"Creation of the directory {dir_path} failed. "
+                "Use --tmp-dir to specify a writable temporary directory."
+            )
 
-            # Creates dir with trailing slash even if not in input
-            # oftentimes people don't add
-            dir = os.path.join(input("insert alternative temporary directory \n:> "), '')
-
-            if os.path.isdir(dir) is True:  # if dir exists already, use it
-                pass
-            elif os.path.isfile(dir) is True:  # it's a file, cant use this
-                print(f"sorry {dir} is an existing file can't create dir")
-                print("make sure to find another directory where you "
-                      "have permissions")
-                sys.exit('...quitting.')
-            else:
-                os.mkdir(dir)
-        else:
-            print("\nSuccessfully created the directory %s " % dir)
-
-    return dir
+    return str(dir_path)
 
 
 def unzip_file(orig_file, tmp_dir):
@@ -298,7 +289,7 @@ def cycle_ask(cur_files):
 
             prefix = input(":> ")
 
-            from_string = "|".join(authors_list.values())
+            from_string = "|".join(re.escape(a) for a in authors_list.values())
 
             # Create a repl function to pass to re.sub
             reversed_authors = {author: num for num, author in authors_list.items()}
@@ -336,14 +327,6 @@ def find_all_authors(cur_files):
     authors_dict = {str(i+1): author
                     for i, author in enumerate(authors_list)}
 
-    def rezip(self, output_prefix, output_dir):
-        # Recreate a version of the file with the new content in it
-
-        output_file = os.path.join(output_dir, output_prefix + self.name)
-        output_file = os.path.join(output_dir, output_prefix + os.path.basename(self.name))
-        shutil.make_archive(output_file, "zip", self.tmp_dir)
-
-        output_file_zip = output_file + ".zip"
     return authors_dict
 
 
@@ -395,9 +378,11 @@ if __name__ == '__main__':
     # Cleanup the main tmp_dir
     cleanup_dir(args.tmp_dir)
 
+    atexit.register(lambda: cleanup_dir(args.tmp_dir))
+
     # Make a tmp directory for each file and unzip the file there
     # Creates a list of File
-    files = [File(filename, os.path.join(args.tmp_dir, str(i)))
+    files = [File(filename, os.path.join(args.tmp_dir, str(i)), args.tmp_dir)
              for i, filename in enumerate(args.filenames)]
 
     cycle_ask(files)
@@ -412,4 +397,4 @@ if __name__ == '__main__':
     for anonymized in anonymized_files:
         print(f"{bcolors.OKGREEN}file is now in {anonymized}{bcolors.ENDC}\n")
 
-    cleanup_dir()
+    cleanup_dir(args.tmp_dir)
