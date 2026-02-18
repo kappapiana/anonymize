@@ -23,14 +23,14 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 # *---------------------------------------------------------------------------
 
+import argparse
 import os
-import sys
 import re
 import shutil
+import sys
 import mimetypes
 import tempfile
 from pathlib import Path
-import argparse
 
 class bcolors:
     '''
@@ -47,6 +47,7 @@ class bcolors:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
 
+    @staticmethod
     def remove_color():
         bcolors.HEADER = ''
         bcolors.OKBLUE = ''
@@ -86,6 +87,7 @@ class File():
         elif self.file_type == "docx":
             self.set_docx_strings()
         else:
+            shutil.rmtree(self.tmp_dir, ignore_errors=True)
             sys.exit(f"{bcolors.FAIL}{bcolors.BOLD}Error:{bcolors.ENDC} "
                      f"{self.file_type} is not a supported file type (from "
                      f"\"{self.name}\")")
@@ -110,17 +112,17 @@ class File():
 
     def set_odt_strings(self):
         self.regex = {
-            "author": "(?P<pre><dc:creator>)(?P<body>{})(?P<post><\/dc:creator>)",
-            "initials": "(?P<pre><meta:creator-initials>)(?P<body>{})(?P<post><\/meta:creator-initials>)",
-            "dates": "(?P<pre><dc:date>)(?P<body>{})(?P<post><\/dc:date>)",
+            "author": r"(?P<pre><dc:creator>)(?P<body>{})(?P<post></dc:creator>)",
+            "initials": r"(?P<pre><meta:creator-initials>)(?P<body>{})(?P<post></meta:creator-initials>)",
+            "dates": r"(?P<pre><dc:date>)(?P<body>{})(?P<post></dc:date>)",
         }
         self.textfiles = [os.path.join(self.tmp_dir, "content.xml")]
 
     def set_docx_strings(self):
         self.regex = {
-            "author": "(?P<pre>w:author=\")(?P<body>{})(?P<post>\")",
-            "initials": "(?P<pre>w:initials=\")(?P<body>{})(?P<post>\")",
-            "dates": "(?P<pre>w:date=\")(?P<body>{})(?P<post>\")",
+            "author": r'(?P<pre>w:author=")(?P<body>{})(?P<post>")',
+            "initials": r'(?P<pre>w:initials=")(?P<body>{})(?P<post>")',
+            "dates": r'(?P<pre>w:date=")(?P<body>{})(?P<post>")',
         }
         self.textfiles = [os.path.join(self.tmp_dir, 'word', xml)
                           for xml in ["comments.xml", "document.xml", "footnotes.xml"]]
@@ -134,31 +136,31 @@ class File():
                 print(f"{bcolors.WARNING}{bcolors.BOLD}Warning:{bcolors.ENDC} Skipping expected file: {textfile}")
         self.textfiles = final
 
-    def replace(self, from_string, to_string, regex, regex_function=False):
+    def replace(self, from_string, to_string, regex):
         ''' Replace text in self.textfiles based on specified regex.
 
         from_string: string or regex string to insert into main tag
-        to_string: string or lambda to replace from_string with after matching
+        to_string: string or callable (e.g. lambda) to replace from_string with after matching
         regex: self.regex key to format with from_string. If None, replace from_string
         '''
         if regex is None:
             regex = re.compile(from_string)
         else:
             regex = re.compile(self.regex[regex].format(from_string))
-            # to_string can also be a lambda function, which should implement this itself
-            if type(to_string) == str:
+            # to_string can also be a callable (e.g. lambda), which receives the match
+            if isinstance(to_string, str):
                 to_string = f"\\g<pre>{to_string}\\g<post>"
 
         for textfile in self.textfiles:
-            with open(textfile, 'r') as f:
+            with open(textfile, 'r', encoding='utf-8') as f:
                 file_contents = regex.sub(to_string, f.read())
-            with open(textfile, 'w') as f:
+            with open(textfile, 'w', encoding='utf-8') as f:
                 f.write(file_contents)
 
     def find_authors(self):
         content = []
         for textfile in self.textfiles:
-            with open(textfile, 'r') as f:
+            with open(textfile, 'r', encoding='utf-8') as f:
                 content = content + re.findall(self.regex["author"].format(".*?"), f.read())
         # Only the second element in the list of tuples is the authors
         return set([x[1] for x in content])
@@ -176,9 +178,9 @@ class File():
         self.replace(".*?", "0001-01-01T00:00:00", "dates")
 
     def rezip(self, output_prefix, output_dir):
-        # Recreate a version of the file with the new content in
-
-        output_file = os.path.join(output_dir, output_prefix + self.name)
+        # Recreate a version of the file with the new content in.
+        # Output uses basename so all files go under output_dir (no input path preserved).
+        output_file = os.path.join(output_dir, output_prefix + os.path.basename(self.name))
         shutil.make_archive(output_file, "zip", self.tmp_dir)
 
         output_file_zip = output_file + ".zip"
@@ -266,7 +268,7 @@ def cycle_ask(cur_files):
 
             prefix = input(":> ")
 
-            from_string = "|".join(authors_list.values())
+            from_string = "|".join(re.escape(a) for a in authors_list.values())
 
             # Create a repl function to pass to re.sub
             reversed_authors = {author: num for num, author in authors_list.items()}
@@ -304,14 +306,6 @@ def find_all_authors(cur_files):
     authors_dict = {str(i+1): author
                     for i, author in enumerate(authors_list)}
 
-    def rezip(self, output_prefix, output_dir):
-        # Recreate a version of the file with the new content in it
-
-        output_file = os.path.join(output_dir, output_prefix + self.name)
-        output_file = os.path.join(output_dir, output_prefix + os.path.basename(self.name))
-        shutil.make_archive(output_file, "zip", self.tmp_dir)
-
-        output_file_zip = output_file + ".zip"
     return authors_dict
 
 
@@ -358,8 +352,8 @@ if __name__ == '__main__':
     if args.no_color or os.getenv("NO_COLOR") is not None:
         bcolors.remove_color()
 
-    # Creates a list of File
-    files = [File(filename) for i, filename in enumerate(args.filenames)]
+    # Creates a list of File (each uses system temp via tempfile.mkdtemp())
+    files = [File(filename) for filename in args.filenames]
 
     cycle_ask(files)
 
