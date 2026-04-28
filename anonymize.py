@@ -110,17 +110,19 @@ class File():
 
     def set_odt_strings(self):
         self.regex = {
-            "author": "(?P<pre><dc:creator>)(?P<body>{})(?P<post><\/dc:creator>)",
-            "initials": "(?P<pre><meta:creator-initials>)(?P<body>{})(?P<post><\/meta:creator-initials>)",
-            "dates": "(?P<pre><dc:date>)(?P<body>{})(?P<post><\/dc:date>)",
+            "author": r"(?P<pre><dc:creator>)(?P<body>{})(?P<post><\/dc:creator>)",
+            "initials": r"(?P<pre><meta:creator-initials>)(?P<body>{})(?P<post><\/meta:creator-initials>)",
+            "dates": r"(?P<pre><dc:date>)(?P<body>{})(?P<post><\/dc:date>)",
+            "libreoffice_comment_reply": r"(?P<pre>\>Reply to )(?P<body>{})(?: \(.*?\))(?P<post>: &quot;.*?&quot;\<\/text:p\>)",
         }
         self.textfiles = [os.path.join(self.tmp_dir, "content.xml")]
 
     def set_docx_strings(self):
         self.regex = {
-            "author": "(?P<pre>w:author=\")(?P<body>{})(?P<post>\")",
-            "initials": "(?P<pre>w:initials=\")(?P<body>{})(?P<post>\")",
-            "dates": "(?P<pre>w:date=\")(?P<body>{})(?P<post>\")",
+            "author": r"(?P<pre>w:author=\")(?P<body>{})(?P<post>\")",
+            "initials": r"(?P<pre>w:initials=\")(?P<body>{})(?P<post>\")",
+            "dates": r"(?P<pre>w:date=\")(?P<body>{})(?P<post>\")",
+            "libreoffice_comment_reply": r"(?P<pre>\<w:t\>Reply to )(?P<body>{})(?: \(.*?\))(?P<post>: &quot;.*?&quot;\<\/w:t\>)",
         }
         self.textfiles = [os.path.join(self.tmp_dir, 'word', xml)
                           for xml in ["comments.xml", "document.xml", "footnotes.xml"]]
@@ -162,6 +164,11 @@ class File():
                 content = content + re.findall(self.regex["author"].format(".*?"), f.read())
         # Only the second element in the list of tuples is the authors
         return set([x[1] for x in content])
+
+    def delete_author(self, from_string, to_string):
+        '''Performs author replacement, including libreoffice comment reply text'''
+        self.replace(from_string, to_string, "author")
+        self.replace(from_string, to_string, "libreoffice_comment_reply")
 
     def delete_initials(self):
         '''replaces the content of the initials tag with an empty string.
@@ -257,7 +264,7 @@ def cycle_ask(cur_files):
             to_string = input(":> ")
 
             for cur_file in cur_files:
-                cur_file.replace(from_string, to_string, "author")
+                cur_file.delete_author(from_string, to_string)
 
         elif from_string == "number all":
             print("\nYou have selected to number all authors"
@@ -266,25 +273,24 @@ def cycle_ask(cur_files):
 
             prefix = input(":> ")
 
-            from_string = "|".join(authors_list.values())
+            # Put list of authors in non-capturing group to prevent interaction with surrounding regex
+            from_string = f"(?:{'|'.join(authors_list.values())})"
 
             # Create a repl function to pass to re.sub
             reversed_authors = {author: num for num, author in authors_list.items()}
             to_string = lambda x: f"{x.group('pre')}{prefix} {reversed_authors.get(x.group('body'), x.group('body'))}{x.group('post')}"
 
             for cur_file in cur_files:
-                cur_file.replace(from_string, to_string, "author")
-                # for n, author in authors_list.items():
-                #     cur_file.replace(re.escape(author), f"{prefix} {n}")
+                cur_file.delete_author(from_string, to_string)
 
-        # othewise, you have selected a good key, let's replace it with
+        # otherwise, you have selected a good key, let's replace it with
         # something and start over
         else:
             print(f"You have selected {from_string}")
             to_string = input(f"\nPlease enter the string you want to change {bcolors.BOLD}to{bcolors.ENDC} \n\n:> ")
 
             for cur_file in cur_files:
-                cur_file.replace(re.escape(from_string), to_string, "author")
+                cur_file.delete_author(re.escape(from_string), to_string)
 
 
 def rezip(cur_files, output_prefix, output_dir):
